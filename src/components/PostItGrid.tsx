@@ -1,47 +1,73 @@
-import type { PostResponse } from "../api/types"
-import { UserBadge } from "./UserBadge";
+import type { PostResponse } from '@/services/types';
+import { UserBadge } from './UserBadge';
+import { formatRelativeDate } from '@/utils/formatDate';
 
-
-interface PostItGrid {
-    posts: PostResponse[];
-    handleLike: (id: number) => Promise<void>;
-    handleDelete: (id: number) => Promise<void>;
-    setSelectedPost: (value: React.SetStateAction<PostResponse | null>) => void;
+interface PostItGridProps {
+  posts: PostResponse[];
+  handleLike: (id: number) => Promise<void>;
+  handleDelete: (id: number) => Promise<void>;
+  setSelectedPost: (value: PostResponse | null) => void;
 }
 
-export function PostItGrid({posts, handleLike, handleDelete, setSelectedPost}: PostItGrid){
+const randomRotate = ['-rotate-1', 'rotate-1', '-rotate-2', 'rotate-2', 'rotate-0'];
 
-    return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {posts.map(post => (
-            <div 
-                key={post.id} 
-                className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm flex flex-col min-h-62.5 relative cursor-pointer hover:shadow-lg hover:-translate-y-1 transition-all duration-200"
-            >
-                <UserBadge userId={post.user_id} />
-                <h2 onClick={() => setSelectedPost(post)} 
-                    className="text-xl font-bold mb-2">
-                    {post.title}
-                </h2>
-                <p onClick={() => setSelectedPost(post)} 
-                    className="text-gray-600 grow whitespace-pre-wrap line-clamp-6">
-                    {post.body || "Post-it vazio..."}
-                </p>
+export function PostItGrid({ posts, handleLike, handleDelete, setSelectedPost }: PostItGridProps) {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-2">
+      {posts.map((post, index) => {
+        const rotateClass = randomRotate[index % randomRotate.length];
 
-                <div className="flex justify-between items-center mt-4 text-xs text-gray-400 border-t pt-4">
-                    <span>{new Date(post.created_at || '').toLocaleDateString()}</span>
-                    <div className="flex gap-4">
-                        <button onClick={() => handleLike(post.id)} className="flex items-center gap-1 hover:text-pink-500 transition-colors">
-                        <span>📌</span> {post.likes}
-                        </button>
-                        <button onClick={() => handleDelete(post.id)} className="hover:text-red-500 transition-colors">
-                        🗑️
-                        </button>
-                    </div>
-                </div>
+        return (
+          <div
+            key={post.id}
+            onClick={() => setSelectedPost(post)}
+            className={`bg-white border border-gray-200/80 rounded-2xl p-6 shadow-sm flex flex-col min-h-62.5 relative cursor-pointer hover:shadow-xl hover:scale-105 hover:rotate-0 hover:z-10 transition-all duration-300 ${rotateClass}`}
+            style={
+              post.color
+                ? { backgroundColor: post.color.hex_code }
+                : { backgroundColor: '#FEF9C3' }
+            }
+          >
+            <UserBadge userId={post.user_id} />
+
+            <h2 className="text-xl font-bold mb-2 text-slate-800 leading-snug">
+              {post.title}
+            </h2>
+
+            <p className="text-slate-700/90 grow whitespace-pre-wrap line-clamp-6 text-sm leading-relaxed">
+              {post.body || 'Post-it vazio...'}
+            </p>
+
+            <div className="flex justify-between items-center mt-4 text-xs text-slate-600/70 border-t border-black/5 pt-4">
+              <span>{formatRelativeDate(post.created_at)}</span>
+              
+              <div className="flex gap-4">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleLike(post.id);
+                  }}
+                  className="flex items-center gap-1 hover:scale-125 transition-transform cursor-pointer"
+                  title="Fixar/Curtir"
+                >
+                  <span>📌</span> <span className="font-semibold">{post.likes ?? 0}</span>
+                </button>
+
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDelete(post.id);
+                  }}
+                  className="hover:scale-125 hover:text-red-600 transition-all cursor-pointer"
+                  title="Deletar"
+                >
+                  🗑️
+                </button>
+              </div>
             </div>
-          ))}
-        </div>
-    )
-
+          </div>
+        );
+      })}
+    </div>
+  );
 }

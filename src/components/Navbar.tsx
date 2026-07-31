@@ -11,7 +11,7 @@ export function Navbar({isAuthenticated, logout, setIsModalOpen}: NavbarProps){
         <div>
             <header className="bg-white border-b border-gray-200 px-8 py-4 flex justify-between items-center">
                 <div className="flex items-center gap-2">
-                    <span className="text-2xl font-bold text-indigo-600">🌿 Peel</span>
+                    <Link to="/" className="text-2xl font-bold text-indigo-600">🌿 Peel</Link>
                 </div>
                 <nav className="flex items-center gap-6 font-medium text-gray-600">
                     <Link to="/" className="hover:text-indigo-600 border-indigo-600 pb-1">Mural</Link>
