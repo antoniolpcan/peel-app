@@ -12,6 +12,7 @@ export function AppRoutes() {
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/perfil" element={<PrivateRoute><Profile /></PrivateRoute>} />
+      <Route path="/perfil/:id" element={<Profile />} />
     </Routes>
   );
 }

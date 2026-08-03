@@ -79,3 +79,34 @@ export function useFollowing(userId: number) {
 
   return { following, loading, error, refetch: fetchFollowing };
 }
+
+export function useFollowActions() {
+  const [loading, setLoading] = useState(false);
+
+  const followUser = async (userId: number) => {
+    try {
+      setLoading(true);
+      return await followService.followUser({ following_id: userId });
+    } catch (err) {
+      console.error('Erro ao seguir usuário:', err);
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const unfollowUser = async (userId: number) => {
+    try {
+      setLoading(true);
+      const success = await followService.unfollowUser(userId);
+      return success ?? true;
+    } catch (err) {
+      console.error('Erro ao deixar de seguir:', err);
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return { followUser, unfollowUser, loading };
+}

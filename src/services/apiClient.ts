@@ -24,8 +24,12 @@ export async function handleResponse<T>(response: Response): Promise<T> {
     throw new Error(message);
   }
 
+  if (response.status === 401) {
+    window.dispatchEvent(new CustomEvent('unauthorized-event'));
+  }
+
   if (response.status === 204) {
-    return null as T;
+    return true as T;
   }
 
   return response.json();

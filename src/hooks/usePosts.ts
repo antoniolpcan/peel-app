@@ -6,6 +6,7 @@ const LIMIT = 12;
 
 export function usePosts(params: GetPostsParams = {}) {
   const [posts, setPosts] = useState<PostResponse[]>([]);
+  const [selectedPost, setSelectedPost] = useState<PostResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [skip, setSkip] = useState(params.skip || 0);
@@ -32,7 +33,6 @@ export function usePosts(params: GetPostsParams = {}) {
   }, [paramsKey]);
 
   const fetchMorePosts = useCallback(async () => {
-
     if (loading || !hasMore) return;
 
     try {
@@ -54,6 +54,32 @@ export function usePosts(params: GetPostsParams = {}) {
     }
   }, [paramsKey, loading, hasMore, skip]);
 
+  const handleLike = useCallback(async (postId: number) => {
+    try {
+      const updatedPost = await postService.likePost(postId);
+      if (updatedPost) {
+        setPosts((prev) => prev.map((p) => (p.id === postId ? updatedPost : p)));
+        setSelectedPost((prev) => (prev?.id === postId ? updatedPost : prev));
+      }
+      return updatedPost;
+    } catch (err) {
+      console.error('Erro ao curtir post:', err);
+      return null;
+    }
+  }, []);
+
+  const handleDelete = useCallback(async (postId: number) => {
+    try {
+      await postService.deletePost(postId);
+      setPosts((prev) => prev.filter((p) => p.id !== postId));
+      setSelectedPost((prev) => (prev?.id === postId ? null : prev));
+      return true;
+    } catch (err) {
+      console.error('Erro ao deletar post:', err);
+      return false;
+    }
+  }, []);
+
   useEffect(() => {
     fetchPosts();
   }, [fetchPosts]);
@@ -61,11 +87,15 @@ export function usePosts(params: GetPostsParams = {}) {
   return {
     posts,
     setPosts,
+    selectedPost,
+    setSelectedPost,
     loading,
     error,
     hasMore,
     refetch: fetchPosts,
     fetchMorePosts,
+    handleLike,
+    handleDelete,
   };
 }
 

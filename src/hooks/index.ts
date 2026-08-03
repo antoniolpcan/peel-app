@@ -4,3 +4,7 @@ export * from './usePosts';
 export * from './useFollows';
 export * from './useColors';
 export * from './useStorage';
+
+export * from './useProfileEdit';
+export * from './useProfileFollow';
+

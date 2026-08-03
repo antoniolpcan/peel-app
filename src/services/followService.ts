@@ -11,12 +11,15 @@ export const followService = {
     return handleResponse<FollowerResponse>(response);
   },
 
-  unfollowUser: async (userId: number): Promise<void> => {
+  unfollowUser: async (userId: number): Promise<boolean> => {
     const response = await fetch(`${BASE_URL}/follows/${userId}`, {
       method: 'DELETE',
       headers: getHeaders(true),
     });
-    return handleResponse<void>(response);
+    if (response.ok) {
+      return true;
+    }
+    return handleResponse<boolean>(response);
   },
 
   getFollowers: async (userId: number): Promise<FollowerResponse[]> => {

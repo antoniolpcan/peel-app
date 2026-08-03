@@ -2,6 +2,10 @@ import { useState } from 'react';
 import { useColors } from '@/hooks/useColors';
 import { usePostActions } from '@/hooks/usePosts';
 import { useToast } from '@/contexts/ToastContext';
+import { ModalLayout } from '@/components/ui/ModalLayout';
+import { ColorPalettePicker } from '@/components/ui/ColorPalettePicker';
+import { PostItNote } from '@/components/ui/PostItNote';
+import { Button } from '@/components/ui/Button';
 
 interface CreatePostModalProps {
   onClose: () => void;
@@ -38,27 +42,15 @@ export function CreatePostModal({ onClose, onSuccess }: CreatePostModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-900/60 flex items-center justify-center p-4 z-50 backdrop-blur-md">
-      <div className="bg-white rounded-3xl p-6 max-w-xl w-full relative shadow-2xl border border-slate-100 flex flex-col gap-5">
-        
+    <ModalLayout onClose={onClose} maxWidthClass="max-w-xl">
+      <div className="flex flex-col gap-5">
         <div className="flex justify-between items-center pb-2 border-b border-slate-100">
           <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
             <span>📌</span> Criar Novo Post-it
           </h3>
-          <button
-            onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-800 transition-colors cursor-pointer"
-          >
-            ✕
-          </button>
         </div>
 
-        <div
-          className="rounded-2xl p-6 min-h-65 flex flex-col shadow-inner transition-colors duration-300 border border-black/5"
-          style={{
-            backgroundColor: currentColor ? currentColor.hex_code : '#FEF9C3',
-          }}
-        >
+        <PostItNote hexCode={currentColor?.hex_code} className="min-h-65 flex flex-col shadow-inner">
           <input
             type="text"
             placeholder="Título do Post-it..."
@@ -73,33 +65,14 @@ export function CreatePostModal({ onClose, onSuccess }: CreatePostModalProps) {
             onChange={(e) => setBody(e.target.value)}
             className="w-full grow bg-transparent outline-none resize-none placeholder:text-slate-700/40 text-slate-800 text-base leading-relaxed"
           />
-        </div>
+        </PostItNote>
 
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-2">
-          {colors.length > 0 ? (
-            <div className="flex gap-2.5 items-center bg-slate-50 px-3 py-2 rounded-2xl border border-slate-200/60">
-              <span className="text-xs font-semibold text-slate-500 mr-1">Cor:</span>
-              {colors.map((color) => {
-                const isSelected = selectedColor === color.id;
-                return (
-                  <button
-                    key={color.id}
-                    type="button"
-                    onClick={() => setSelectedColor(color.id)}
-                    className={`w-6 h-6 rounded-full cursor-pointer transition-all duration-200 border-2 border-slate-900/40 ${
-                      isSelected
-                        ? 'scale-125 border-slate-950 ring-2 ring-indigo-500 ring-offset-2 shadow-md'
-                        : 'hover:scale-110 opacity-90 hover:border-slate-900'
-                    }`}
-                    style={{ backgroundColor: color.hex_code }}
-                    title={color.name}
-                  />
-                );
-              })}
-            </div>
-          ) : (
-            <div />
-          )}
+          <ColorPalettePicker
+            colors={colors}
+            selectedColorId={selectedColor}
+            onSelectColor={setSelectedColor}
+          />
 
           <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
             <button
@@ -109,17 +82,18 @@ export function CreatePostModal({ onClose, onSuccess }: CreatePostModalProps) {
             >
               Cancelar
             </button>
-            <button
+            <Button
+              type="button"
               onClick={onSubmit}
-              disabled={isLoading}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-6 py-2.5 rounded-xl text-sm transition-all shadow-md shadow-indigo-200 disabled:opacity-50 cursor-pointer"
+              isLoading={isLoading}
+              loadingText="Salvando..."
+              className="px-6 py-2.5 text-sm mt-0 shadow-md shadow-indigo-200"
             >
-              {isLoading ? 'Salvando...' : 'Colar Post-it'}
-            </button>
+              Colar Post-it
+            </Button>
           </div>
         </div>
-
       </div>
-    </div>
+    </ModalLayout>
   );
 }

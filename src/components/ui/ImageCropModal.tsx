@@ -73,7 +73,7 @@ export function ImageCropModal({ imageSrc, onClose, onCropComplete }: ImageCropM
       <div className="bg-white rounded-3xl p-6 max-w-lg w-full flex flex-col gap-4 shadow-2xl border border-slate-100">
         
         <div className="flex justify-between items-center pb-2 border-b border-slate-100">
-          <h3 className="text-lg font-bold text-slate-800">✂️ Recortar Foto de Perfil</h3>
+          <h3 className="text-lg font-bold text-slate-800">Recortar</h3>
           <button
             onClick={onClose}
             className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 cursor-pointer"
