@@ -11,7 +11,7 @@ export function PageLayout({ children, onOpenCreateModal }: PageLayoutProps) {
   const { logout, isAuthenticated } = useAuth();
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-16">
+    <div className="min-h-screen bg-app-bg text-app-text transition-colors duration-200">
       <Navbar
         isAuthenticated={isAuthenticated}
         logout={logout}

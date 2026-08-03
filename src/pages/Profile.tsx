@@ -48,13 +48,30 @@ export function Profile() {
 
   const filteredPosts = posts.filter((post) => selectedColorId === null || post.color_id === selectedColorId);
 
-  if (isFetching) return <div className="min-h-screen flex items-center justify-center text-gray-500">Carregando...</div>;
-  if (!user) return <div className="min-h-screen flex items-center justify-center text-gray-500">Usuário não encontrado.</div>;
+  if (isFetching) {
+    return (
+      <PageLayout>
+        <div className="flex flex-col items-center justify-center py-32 text-app-muted font-medium animate-pulse">
+          <span className="text-2xl mb-2">🌿</span>
+          <p>Carregando perfil...</p>
+        </div>
+      </PageLayout>
+    );
+  }
+
+  if (!user) {
+    return (
+      <PageLayout>
+        <div className="flex flex-col items-center justify-center py-32 text-app-muted">
+          <p className="text-lg font-semibold">Usuário não encontrado.</p>
+        </div>
+      </PageLayout>
+    );
+  }
 
   return (
     <PageLayout onOpenCreateModal={() => setIsCreateModalOpen(true)}>
-      
-      <div className="bg-white rounded-3xl p-8 border border-gray-200 shadow-sm">
+      <div className="bg-app-card rounded-3xl p-6 sm:p-8 border border-app-border shadow-xs mb-8 transition-colors">
         <ProfileHeader
           user={user}
           stats={follow.stats}
@@ -81,9 +98,9 @@ export function Profile() {
             onCancel={edit.cancelEditing}
           />
         ) : (
-          <div className="border-t border-gray-100 pt-6">
-            <h3 className="text-lg font-bold text-slate-800 mb-2">Sobre mim</h3>
-            <p className="text-gray-600 whitespace-pre-wrap text-sm leading-relaxed">
+          <div className="border-t border-app-border pt-6 transition-colors">
+            <h3 className="text-lg font-bold text-app-text mb-2">Sobre mim</h3>
+            <p className="text-app-muted whitespace-pre-wrap text-sm leading-relaxed">
               {user.bio || 'Nenhuma bio cadastrada ainda.'}
             </p>
           </div>

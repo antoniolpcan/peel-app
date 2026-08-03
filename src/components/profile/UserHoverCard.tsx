@@ -4,7 +4,7 @@ import { FollowButton } from '@/components/ui/FollowButton';
 import type { BasicUserResponse, FollowStatsResponse } from '@/services/types';
 
 interface UserHoverCardProps {
-  userId: number,
+  userId: number;
   user: BasicUserResponse;
   stats?: FollowStatsResponse | null;
   isOwnProfile: boolean;
@@ -26,12 +26,13 @@ export function UserHoverCard({
 }: UserHoverCardProps) {
   return (
     <div
-      className="w-64 bg-white opacity-100 rounded-2xl p-4 shadow-2xl border border-slate-100 animate-fadeIn pointer-events-auto"
-      style={{ filter: 'drop-shadow(0 10px 25px rgba(0, 0, 0, 0.15))' }}
+      className="w-64 bg-app-card rounded-2xl p-4 shadow-2xl border 
+      border-app-border animate-fadeIn pointer-events-auto transition-colors"
+      style={{ filter: 'drop-shadow(0 10px 25px rgba(0, 0, 0, 0.3))' }}
     >
       <div className="flex justify-between items-start mb-3">
         <Link to={`/perfil/${userId}`}>
-          <UserAvatar name={user.name} avatar={user.avatar} sizeClass="w-12 h-12" textSizeClass="text-base" />
+          <UserAvatar name={user.name} avatar={user.avatar} size="md" />
         </Link>
 
         {!isOwnProfile && isAuthenticated && (
@@ -45,26 +46,26 @@ export function UserHoverCard({
       </div>
 
       <Link to={`/perfil/${userId}`} className="block group/link">
-        <h4 className="font-bold text-sm text-slate-800 leading-tight group-hover/link:underline">
+        <h4 className="font-bold text-sm text-app-text leading-tight group-hover/link:underline transition-colors">
           {user.name}
         </h4>
-        <p className="text-xs text-slate-400 mb-2">@{user.username}</p>
+        <p className="text-xs text-app-muted mb-2">@{user.username}</p>
       </Link>
 
       {user.bio && (
-        <p className="text-xs text-slate-600 line-clamp-2 mb-3 leading-relaxed">
+        <p className="text-xs text-app-text/90 line-clamp-2 mb-3 leading-relaxed transition-colors">
           {user.bio}
         </p>
       )}
 
-      <div className="flex gap-4 pt-2 border-t border-slate-100 text-xs">
+      <div className="flex gap-4 pt-2 border-t border-app-border text-xs transition-colors">
         <div>
-          <span className="font-bold text-slate-800">{stats?.followers_count ?? 0}</span>{' '}
-          <span className="text-slate-400">Seguidores</span>
+          <span className="font-bold text-app-text">{stats?.followers_count ?? 0}</span>{' '}
+          <span className="text-app-muted">Seguidores</span>
         </div>
         <div>
-          <span className="font-bold text-slate-800">{stats?.following_count ?? 0}</span>{' '}
-          <span className="text-slate-400">Seguindo</span>
+          <span className="font-bold text-app-text">{stats?.following_count ?? 0}</span>{' '}
+          <span className="text-app-muted">Seguindo</span>
         </div>
       </div>
     </div>

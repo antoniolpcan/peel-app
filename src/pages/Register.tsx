@@ -34,7 +34,7 @@ export function Register() {
     });
 
     if (newUser) {
-      addToast('Conta criada com sucesso! Faça login para continuar.', 'success');
+      addToast('Conta criada com sucesso! Faça login para continuar. ✨', 'success');
       navigate('/login');
     }
   };
@@ -42,47 +42,76 @@ export function Register() {
   return (
     <AuthLayout
       title="Crie sua conta"
-      footerText="Já tem uma conta?"
-      footerLinkText="Entre aqui"
+      subtitle="Junte-se ao Peel e comece a colar suas ideias"
+      footerText="Já possui uma conta?"
+      footerLinkText="Fazer Login"
       footerLinkTo="/login"
     >
       {error && <ErrorMessage message={error} />}
 
-      <form onSubmit={handleRegister} className="flex flex-col gap-4">
-        <Input
-          name="name"
-          type="text"
-          placeholder="Seu nome"
-          value={formData.name}
-          onChange={handleChange}
-          required
-        />
-        <Input
-          name="username"
-          type="text"
-          placeholder="Nome de usuário (opcional)"
-          value={formData.username}
-          onChange={handleChange}
-        />
-        <Input
-          name="email"
-          type="email"
-          placeholder="Email"
-          value={formData.email}
-          onChange={handleChange}
-          required
-        />
-        <Input
-          name="password"
-          type="password"
-          placeholder="Senha"
-          value={formData.password}
-          onChange={handleChange}
-          required
-        />
+      <form onSubmit={handleRegister} className="flex flex-col gap-3.5">
+        <div className="space-y-1">
+          <label className="text-xs font-semibold text-app-muted ml-1">
+            Seu Nome
+          </label>
+          <Input
+            name="name"
+            type="text"
+            placeholder="Como quer ser chamado?"
+            value={formData.name}
+            onChange={handleChange}
+            required
+          />
+        </div>
 
-        <Button type="submit" isLoading={loading} loadingText="Criando...">
-          Cadastrar
+        <div className="space-y-1">
+          <label className="text-xs font-semibold text-app-muted ml-1">
+            Nome de Usuário <span className="font-normal opacity-70">(opcional)</span>
+          </label>
+          <Input
+            name="username"
+            type="text"
+            placeholder="@seu_username"
+            value={formData.username}
+            onChange={handleChange}
+          />
+        </div>
+
+        <div className="space-y-1">
+          <label className="text-xs font-semibold text-app-muted ml-1">
+            E-mail
+          </label>
+          <Input
+            name="email"
+            type="email"
+            placeholder="seu@email.com"
+            value={formData.email}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
+        <div className="space-y-1">
+          <label className="text-xs font-semibold text-app-muted ml-1">
+            Senha
+          </label>
+          <Input
+            name="password"
+            type="password"
+            placeholder="Crie uma senha segura"
+            value={formData.password}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
+        <Button 
+          type="submit" 
+          isLoading={loading} 
+          loadingText="Criando conta..."
+          className="mt-3"
+        >
+          Criar minha conta
         </Button>
       </form>
     </AuthLayout>

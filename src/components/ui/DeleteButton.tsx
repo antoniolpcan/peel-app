@@ -7,7 +7,7 @@ export function DeleteButton({ onClick }: DeleteButtonProps) {
     <button
       type="button"
       onClick={onClick}
-      className="hover:scale-125 hover:text-red-600 transition-all cursor-pointer"
+      className="hover:scale-125 hover:text-red-500 transition-all cursor-pointer text-app-text"
       title="Deletar"
     >
       🗑️

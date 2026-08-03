@@ -29,14 +29,14 @@ export function CommentForm({ onSubmitComment }: CommentFormProps) {
         value={newComment}
         onChange={(e) => setNewComment(e.target.value)}
         placeholder="Adicione um comentário..."
-        className="grow bg-slate-50 border-slate-200 py-2.5 text-sm"
+        className="grow py-2.5 text-sm"
       />
       <Button
         type="submit"
         isLoading={isSubmitting}
         loadingText="Enviando..."
         disabled={!newComment.trim()}
-        className="px-5 py-2.5 text-sm mt-0 shadow-xs shadow-indigo-100"
+        className="px-5 py-2.5 text-sm mt-0 shadow-xs"
       >
         Enviar
       </Button>

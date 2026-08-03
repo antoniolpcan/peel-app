@@ -26,7 +26,7 @@ export function ProfileEditForm({
   onCancel,
 }: ProfileEditFormProps) {
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-5 border-t border-gray-100 pt-6">
+    <form onSubmit={onSubmit} className="flex flex-col gap-5 border-t border-app-border pt-6 transition-colors">
       <AvatarUploader
         avatarPreview={avatarPreview}
         isUploading={isUploadingImage}
@@ -34,7 +34,7 @@ export function ProfileEditForm({
       />
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Nome</label>
+        <label className="block text-sm font-medium text-app-text mb-1 transition-colors">Nome</label>
         <Input
           type="text"
           value={editForm.name}
@@ -44,7 +44,7 @@ export function ProfileEditForm({
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
+        <label className="block text-sm font-medium text-app-text mb-1 transition-colors">Username</label>
         <Input
           type="text"
           value={editForm.username}
@@ -53,7 +53,7 @@ export function ProfileEditForm({
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Bio</label>
+        <label className="block text-sm font-medium text-app-text mb-1 transition-colors">Bio</label>
         <TextArea
           value={editForm.bio}
           onChange={(e) => setEditForm((prev) => ({ ...prev, bio: e.target.value }))}
@@ -66,7 +66,7 @@ export function ProfileEditForm({
         <button
           type="button"
           onClick={onCancel}
-          className="px-6 py-2 rounded-xl font-medium text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer text-sm"
+          className="px-6 py-2 rounded-xl font-medium text-app-muted hover:text-app-text transition-colors cursor-pointer text-sm"
         >
           Cancelar
         </button>
@@ -74,7 +74,7 @@ export function ProfileEditForm({
           type="submit"
           isLoading={isUpdating || isUploadingImage}
           loadingText="Salvando..."
-          className="px-6 py-2 text-sm mt-0"
+          className="px-6 py-2 text-sm mt-0 shadow-none"
         >
           Salvar Alterações
         </Button>

@@ -49,7 +49,7 @@ export function ToastProvider({ children }: ToastProviderProps) {
           >
             <div className="flex items-center gap-2.5 text-sm font-medium">
               <span>
-                {toast.type === 'success' && '✅'}
+                {toast.type === 'success' && ''}
                 {toast.type === 'error' && '❌'}
                 {toast.type === 'info' && '📌'}
               </span>

@@ -17,8 +17,8 @@ export function Button({
     <button
       {...props}
       disabled={disabled || isLoading}
-      className={`bg-indigo-600 hover:bg-indigo-700 text-white 
-        font-medium py-3 rounded-xl transition-colors 
+      className={`bg-app-accent hover:opacity-90 text-app-accent-text 
+        font-semibold py-3 rounded-xl transition-all 
         disabled:opacity-50 mt-2 cursor-pointer 
         disabled:cursor-not-allowed ${className}`}
     >

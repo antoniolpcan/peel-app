@@ -21,7 +21,7 @@ export function Login() {
     const response = await executeLogin(username, password);
 
     if (response?.access_token) {
-      addToast('Login realizado com sucesso!', 'success');
+      addToast('Bem-vindo de volta! 🌿', 'success');
       saveSession(response.access_token);
     } else {
       addToast(error || 'Falha no login. Verifique suas credenciais.', 'error');
@@ -30,31 +30,48 @@ export function Login() {
 
   return (
     <AuthLayout
-      title="Entre na sua conta"
-      footerText="Ainda não tem conta?"
-      footerLinkText="Cadastre-se"
+      title="Que bom te ver de novo!"
+      subtitle="Entre com suas credenciais para acessar seus post-its"
+      footerText="Ainda não tem uma conta?"
+      footerLinkText="Cadastre-se grátis"
       footerLinkTo="/register"
     >
       {error && <ErrorMessage message={error} />}
 
       <form onSubmit={handleLogin} className="flex flex-col gap-4">
-        <Input
-          type="text"
-          placeholder="Nome de usuário ou E-mail"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          required
-        />
-        <Input
-          type="password"
-          placeholder="Senha"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
+        <div className="space-y-1">
+          <label className="text-xs font-semibold text-app-muted ml-1">
+            Usuário ou E-mail
+          </label>
+          <Input
+            type="text"
+            placeholder="Ex: example ou example@email.com"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required
+          />
+        </div>
 
-        <Button type="submit" isLoading={loading} loadingText="Entrando...">
-          Entrar
+        <div className="space-y-1">
+          <label className="text-xs font-semibold text-app-muted ml-1">
+            Senha
+          </label>
+          <Input
+            type="password"
+            placeholder="••••••••"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+        </div>
+
+        <Button 
+          type="submit" 
+          isLoading={loading} 
+          loadingText="Entrando..."
+          className="mt-2"
+        >
+          Entrar no Peel
         </Button>
       </form>
     </AuthLayout>

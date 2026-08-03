@@ -23,8 +23,8 @@ export function FollowStats({
         disabled={!onOpenFollowers}
         className={`hover:underline cursor-pointer ${!onOpenFollowers ? 'cursor-default no-underline' : ''}`}
       >
-        <span className="font-bold text-slate-800">{followersCount}</span>{' '}
-        <span className="text-slate-500">Seguidores</span>
+        <span className="font-bold text-app-text transition-colors">{followersCount}</span>{' '}
+        <span className="text-app-muted transition-colors">Seguidores</span>
       </button>
 
       <button
@@ -33,8 +33,8 @@ export function FollowStats({
         disabled={!onOpenFollowing}
         className={`hover:underline cursor-pointer ${!onOpenFollowing ? 'cursor-default no-underline' : ''}`}
       >
-        <span className="font-bold text-slate-800">{followingCount}</span>{' '}
-        <span className="text-slate-500">Seguindo</span>
+        <span className="font-bold text-app-text transition-colors">{followingCount}</span>{' '}
+        <span className="text-app-muted transition-colors">Seguindo</span>
       </button>
     </div>
   );

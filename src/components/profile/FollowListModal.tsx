@@ -20,16 +20,16 @@ export function FollowListModal({ type, loading, users, onClose }: FollowListMod
   return (
     <ModalLayout onClose={onClose} maxWidthClass="max-w-md">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-bold text-slate-800">
+        <h2 className="text-xl font-bold text-app-text transition-colors">
           {type === 'followers' ? 'Seguidores' : 'Seguindo'}
         </h2>
       </div>
 
       <div className="overflow-y-auto flex-1 pr-2 max-h-[60vh]">
         {loading ? (
-          <p className="text-center text-gray-500 py-6">Carregando...</p>
+          <p className="text-center text-app-muted py-6">Carregando...</p>
         ) : users.length === 0 ? (
-          <p className="text-center text-gray-500 py-6">Nenhum usuário encontrado.</p>
+          <p className="text-center text-app-muted py-6">Nenhum usuário encontrado.</p>
         ) : (
           <ul className="flex flex-col gap-4">
             {users.map((item) => {

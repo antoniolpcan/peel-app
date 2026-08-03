@@ -11,7 +11,7 @@ export function CommentList({ comments, isLoading, onNavigate }: CommentListProp
   if (isLoading) {
     return (
       <div className="flex justify-center items-center py-6">
-        <p className="text-sm text-slate-400 italic animate-pulse">
+        <p className="text-sm text-app-muted italic animate-pulse">
           Carregando comentários...
         </p>
       </div>
@@ -20,7 +20,7 @@ export function CommentList({ comments, isLoading, onNavigate }: CommentListProp
 
   if (comments.length === 0) {
     return (
-      <p className="text-sm text-slate-400 italic py-2">
+      <p className="text-sm text-app-muted italic py-2">
         Ninguém comentou ainda. Seja o primeiro a colar uma nota aqui!
       </p>
     );

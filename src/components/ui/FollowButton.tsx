@@ -20,8 +20,8 @@ export function FollowButton({
       disabled={isLoading}
       className={`${sizeClasses} rounded-xl font-medium transition-all cursor-pointer shadow-2xs ${
         isFollowing
-          ? 'bg-slate-100 text-slate-700 hover:bg-rose-50 hover:text-rose-600 border border-slate-200'
-          : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-100'
+          ? 'bg-app-bg text-app-text hover:bg-rose-500/10 hover:text-rose-500 border border-app-border'
+          : 'bg-indigo-600 hover:bg-indigo-700 text-white'
       }`}
     >
       {isLoading ? '...' : isFollowing ? 'Seguindo' : 'Seguir'}

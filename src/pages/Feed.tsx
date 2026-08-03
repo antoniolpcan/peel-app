@@ -60,12 +60,14 @@ export function Feed() {
       </PinboardHeader>
 
       {posts.length === 0 && loading ? (
-        <div className="text-center py-20 text-gray-500 animate-pulse">Carregando mural...</div>
+        <div className="text-center py-20 text-app-muted animate-pulse">
+          Carregando mural...
+        </div>
       ) : error ? (
         <div className="text-center py-20 text-red-500">{error}</div>
       ) : filteredPosts.length === 0 ? (
-        <div className="text-center py-20 bg-white rounded-3xl border border-gray-200/80 shadow-sm">
-          <p className="text-gray-500 text-lg">Nenhum post-it encontrado.</p>
+        <div className="text-center py-20 bg-app-card rounded-3xl border border-app-border shadow-xs transition-colors">
+          <p className="text-app-muted text-lg">Nenhum post-it encontrado.</p>
         </div>
       ) : (
         <>
@@ -73,14 +75,14 @@ export function Feed() {
 
           {loading && (
             <div className="flex justify-center items-center py-8">
-              <p className="text-sm font-medium text-slate-400 animate-pulse flex items-center gap-2">
+              <p className="text-sm font-medium text-app-muted animate-pulse flex items-center gap-2">
                 <span>📌</span> Buscando mais post-its...
               </p>
             </div>
           )}
 
           {!hasMore && (
-            <div className="text-center py-10 text-xs text-gray-400">
+            <div className="text-center py-10 text-xs text-app-muted">
               🎉 Você chegou ao fim do mural!
             </div>
           )}

@@ -36,28 +36,38 @@ export function ImageCropModal({ imageSrc, onClose, onCropComplete }: ImageCropM
 
   const handleConfirmCrop = () => {
     const img = imageRef.current;
-    if (!img) return;
+    const container = containerRef.current;
+    if (!img || !container) return;
+
+    const imgRect = img.getBoundingClientRect();
+    const containerRect = container.getBoundingClientRect();
+
+    const imgOffsetX = imgRect.left - containerRect.left;
+    const imgOffsetY = imgRect.top - containerRect.top;
+
+    const cropXOnImg = crop.x - imgOffsetX;
+    const cropYOnImg = crop.y - imgOffsetY;
+
+    const scaleX = img.naturalWidth / imgRect.width;
+    const scaleY = img.naturalHeight / imgRect.height;
 
     const canvas = document.createElement('canvas');
-    const scaleX = img.naturalWidth / img.clientWidth;
-    const scaleY = img.naturalHeight / img.clientHeight;
-
-    canvas.width = crop.width * scaleX;
-    canvas.height = crop.height * scaleY;
+    canvas.width = 300;
+    canvas.height = 300;
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
     ctx.drawImage(
       img,
-      crop.x * scaleX,
-      crop.y * scaleY,
+      cropXOnImg * scaleX,
+      cropYOnImg * scaleY,
       crop.width * scaleX,
       crop.height * scaleY,
       0,
       0,
-      crop.width * scaleX,
-      crop.height * scaleY
+      300,
+      300
     );
 
     canvas.toBlob((blob) => {
@@ -65,18 +75,19 @@ export function ImageCropModal({ imageSrc, onClose, onCropComplete }: ImageCropM
         const file = new File([blob], 'avatar-cropped.png', { type: 'image/png' });
         onCropComplete(file);
       }
-    }, 'image/png');
+    }, 'image/png', 0.95);
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-900/70 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
-      <div className="bg-white rounded-3xl p-6 max-w-lg w-full flex flex-col gap-4 shadow-2xl border border-slate-100">
+    <div className="fixed inset-0 bg-slate-950/70 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
+      <div className="bg-app-card rounded-3xl p-6 max-w-lg w-full flex flex-col gap-4 shadow-2xl border border-app-border transition-colors">
         
-        <div className="flex justify-between items-center pb-2 border-b border-slate-100">
-          <h3 className="text-lg font-bold text-slate-800">Recortar</h3>
+        <div className="flex justify-between items-center pb-2 border-b border-app-border">
+          <h3 className="text-lg font-bold text-app-text">Recortar Foto</h3>
           <button
+            type="button"
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 cursor-pointer"
+            className="w-8 h-8 flex items-center justify-center rounded-full bg-app-bg text-app-muted hover:text-app-text cursor-pointer transition-colors"
           >
             ✕
           </button>
@@ -86,7 +97,7 @@ export function ImageCropModal({ imageSrc, onClose, onCropComplete }: ImageCropM
           ref={containerRef}
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
-          className="relative overflow-hidden bg-slate-900 rounded-2xl flex items-center justify-center max-h-87.5 select-none cursor-crosshair"
+          className="relative overflow-hidden bg-slate-950 rounded-2xl flex items-center justify-center max-h-87.5 select-none cursor-crosshair border border-app-border min-h-64"
         >
           <img
             ref={imageRef}
@@ -103,16 +114,16 @@ export function ImageCropModal({ imageSrc, onClose, onCropComplete }: ImageCropM
               width: `${crop.width}px`,
               height: `${crop.height}px`,
             }}
-            className="absolute border-2 border-indigo-500 bg-indigo-500/20 rounded-full shadow-[0_0_0_9999px_rgba(0,0,0,0.5)] cursor-move"
+            className="absolute border-2 border-app-accent bg-app-accent/20 rounded-full shadow-[0_0_0_9999px_rgba(0,0,0,0.6)] cursor-move transition-all duration-75"
           >
-            <span className="absolute inset-0 flex items-center justify-center text-xs text-white font-medium drop-shadow-md">
+            <span className="absolute inset-0 flex items-center justify-center text-xs text-white font-semibold drop-shadow-md pointer-events-none select-none">
               Arraste aqui
             </span>
           </div>
         </div>
 
-        <div className="flex items-center gap-3 bg-slate-50 px-4 py-2 rounded-xl border border-slate-100">
-          <span className="text-xs text-slate-500 font-semibold">Tamanho:</span>
+        <div className="flex items-center gap-3 bg-app-bg px-4 py-2 rounded-xl border border-app-border transition-colors">
+          <span className="text-xs text-app-muted font-semibold">Tamanho:</span>
           <input
             type="range"
             min="80"
@@ -122,20 +133,22 @@ export function ImageCropModal({ imageSrc, onClose, onCropComplete }: ImageCropM
               const val = Number(e.target.value);
               setCrop((prev) => ({ ...prev, width: val, height: val }));
             }}
-            className="grow cursor-pointer accent-indigo-600"
+            className="grow cursor-pointer accent-app-accent"
           />
         </div>
 
         <div className="flex justify-end gap-3 pt-2">
           <button
+            type="button"
             onClick={onClose}
-            className="px-5 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100 cursor-pointer"
+            className="px-5 py-2.5 rounded-xl text-sm font-medium text-app-muted hover:text-app-text transition-colors cursor-pointer"
           >
             Cancelar
           </button>
           <button
+            type="button"
             onClick={handleConfirmCrop}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-6 py-2.5 rounded-xl text-sm transition-all shadow-md shadow-indigo-200 cursor-pointer"
+            className="bg-app-accent text-app-accent-text font-medium px-6 py-2.5 rounded-xl text-sm hover:opacity-90 transition-all shadow-md cursor-pointer"
           >
             Confirmar e Enviar
           </button>

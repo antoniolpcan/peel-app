@@ -11,18 +11,21 @@ interface FollowListItemProps {
 
 export function FollowListItem({ user }: FollowListItemProps) {
   return (
-    <li className="flex items-center gap-4 p-2 hover:bg-gray-50 rounded-2xl transition-colors cursor-pointer">
+    <li className="flex items-center gap-4 p-2.5 hover:bg-app-bg/60 rounded-2xl transition-colors cursor-pointer">
       <UserAvatar
         name={user.name}
         avatar={user.avatar}
-        sizeClass="w-12 h-12"
-        textSizeClass="text-lg"
+        size="md"
       />
-      <div>
-        <p className="font-bold text-slate-800">{user.name}</p>
-        <p className="text-sm text-gray-500">
-          {user.username ? `@${user.username}` : ''}
+      <div className="flex flex-col">
+        <p className="font-bold text-sm text-app-text transition-colors leading-snug">
+          {user.name}
         </p>
+        {user.username && (
+          <p className="text-xs text-app-muted transition-colors">
+            @{user.username}
+          </p>
+        )}
       </div>
     </li>
   );

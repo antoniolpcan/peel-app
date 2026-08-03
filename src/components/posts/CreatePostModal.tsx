@@ -44,8 +44,8 @@ export function CreatePostModal({ onClose, onSuccess }: CreatePostModalProps) {
   return (
     <ModalLayout onClose={onClose} maxWidthClass="max-w-xl">
       <div className="flex flex-col gap-5">
-        <div className="flex justify-between items-center pb-2 border-b border-slate-100">
-          <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+        <div className="flex justify-between items-center pb-2 border-b border-app-border transition-colors">
+          <h3 className="text-lg font-bold text-app-text flex items-center gap-2 transition-colors">
             <span>📌</span> Criar Novo Post-it
           </h3>
         </div>
@@ -56,14 +56,16 @@ export function CreatePostModal({ onClose, onSuccess }: CreatePostModalProps) {
             placeholder="Título do Post-it..."
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="text-xl font-bold bg-transparent outline-none placeholder:text-slate-700/50 text-slate-800 mb-3"
+            className="text-xl font-bold bg-transparent outline-none 
+            placeholder:text-slate-700/50 text-slate-800 mb-3"
           />
 
           <textarea
             placeholder="Escreva sua nota aqui..."
             value={body}
             onChange={(e) => setBody(e.target.value)}
-            className="w-full grow bg-transparent outline-none resize-none placeholder:text-slate-700/40 text-slate-800 text-base leading-relaxed"
+            className="w-full grow bg-transparent outline-none resize-none 
+            placeholder:text-slate-700/40 text-slate-800 text-base leading-relaxed"
           />
         </PostItNote>
 
@@ -78,7 +80,8 @@ export function CreatePostModal({ onClose, onSuccess }: CreatePostModalProps) {
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
+              className="px-5 py-2.5 text-sm font-medium text-app-muted 
+              hover:text-app-text rounded-xl transition-colors cursor-pointer"
             >
               Cancelar
             </button>
@@ -87,7 +90,7 @@ export function CreatePostModal({ onClose, onSuccess }: CreatePostModalProps) {
               onClick={onSubmit}
               isLoading={isLoading}
               loadingText="Salvando..."
-              className="px-6 py-2.5 text-sm mt-0 shadow-md shadow-indigo-200"
+              className="px-6 py-2.5 text-sm mt-0 shadow-md"
             >
               Colar Post-it
             </Button>

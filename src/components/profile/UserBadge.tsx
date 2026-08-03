@@ -47,15 +47,15 @@ export function UserBadge({ userId, onNavigate }: UserBadgeProps) {
   if (loading || !user) {
     return (
       <div className="flex items-center gap-2 mb-2 opacity-50 animate-pulse">
-        <div className="w-8 h-8 rounded-full bg-slate-200" />
-        <span className="text-xs text-slate-400">Carregando...</span>
+        <div className="w-8 h-8 rounded-full bg-app-border" />
+        <span className="text-xs text-app-muted">Carregando...</span>
       </div>
     );
   }
 
   return (
     <div 
-      className="relative inline-block z-20"
+      className="relative inline-block z-20 mb-2"
       onClick={(e) => e.stopPropagation()}
     >
       <div className="flex items-center gap-2.5 w-fit">
@@ -65,9 +65,9 @@ export function UserBadge({ userId, onNavigate }: UserBadgeProps) {
             onClick={onNavigate}
             className="block hover:opacity-80 transition-opacity cursor-pointer"
           >
-            <UserAvatar name={user.name} avatar={user.avatar} sizeClass="w-8 h-8" textSizeClass="text-xs" />
+            <UserAvatar name={user.name} avatar={user.avatar} size="md" />
           </Link>
-          <div className="hidden group-hover/avatar-hover:block absolute top-0 left-0 pt-2 z-50">
+          <div className="hidden group-hover/avatar-hover:block absolute top-0 left-0 pt-2 z-999">
             <UserHoverCard
               userId={userId}
               user={user}
@@ -89,7 +89,7 @@ export function UserBadge({ userId, onNavigate }: UserBadgeProps) {
             {user.name}
           </span>
           {user.username && (
-            <span className="text-[11px] text-slate-500 font-normal">@{user.username}</span>
+            <span className="text-[11px] text-slate-600 font-normal">@{user.username}</span>
           )}
         </Link>
       </div>

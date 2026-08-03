@@ -8,10 +8,16 @@ interface PinboardHeaderProps {
 
 export function PinboardHeader({ title, subtitle, children }: PinboardHeaderProps) {
   return (
-    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-8">
       <div>
-        <h1 className="text-3xl font-bold text-slate-800">{title}</h1>
-        {subtitle && <p className="text-gray-500 mt-1">{subtitle}</p>}
+        <h1 className="text-3xl font-bold text-(--accent-color) transition-colors">
+          {title}
+        </h1>
+        {subtitle && (
+          <p className="text-(--text-muted) mt-1 text-sm transition-colors">
+            {subtitle}
+          </p>
+        )}
       </div>
 
       {children && (

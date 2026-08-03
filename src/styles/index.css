@@ -1,8 +1,16 @@
 @import "tailwindcss";
 
-body {
-  @apply bg-gray-50 text-slate-800;
+@theme {
+  --color-app-bg: var(--bg-page);
+  --color-app-card: var(--bg-card);
+  --color-app-border: var(--border-color);
+  --color-app-text: var(--text-primary);
+  --color-app-muted: var(--text-muted);
+  --color-app-accent: var(--accent-color);
+  --color-app-accent-text: var(--accent-text-color);
 }
+
+@custom-variant dark (&:where(.dark, .dark *));
 
 @keyframes peelOff {
   0% {
@@ -21,4 +29,93 @@ body {
 
 .animate-peel {
   animation: peelOff 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@layer base {
+  
+  :root, [data-theme="light"] {
+    --bg-page: #f8fafc;
+    --bg-card: #ffffff;
+    --border-color: #e2e8f0;
+    --text-primary: #1e293b;
+    --text-muted: #64748b;
+    --accent-color: #4f46e5;
+    --accent-text-color: #ffffff;
+  }
+
+  .dark, [data-theme="dark"] {
+    --bg-page: #0f172a;
+    --bg-card: #1e293b;
+    --border-color: #334155;
+    --text-primary: #f8fafc;
+    --text-muted: #94a3b8;
+    --accent-color: #6366f1;
+    --accent-text-color: #ffffff;
+  }
+
+  [data-theme="midnight"] {
+    --bg-page: #030712;
+    --bg-card: #111827;
+    --border-color: #1f2937;
+    --text-primary: #f9fafb;
+    --text-muted: #9ca3af;
+    --accent-color: #38bdf8;
+    --accent-text-color: #030712;
+  }
+
+  [data-theme="dracula"] {
+    --bg-page: #21222c;
+    --bg-card: #282a36;
+    --border-color: #44475a;
+    --text-primary: #f8f8f2;
+    --text-muted: #bd93f9;
+    --accent-color: #ff79c6;
+    --accent-text-color: #21222c;
+  }
+
+  [data-theme="nord"] {
+    --bg-page: #2e3440;
+    --bg-card: #3b4252;
+    --border-color: #4c566a;
+    --text-primary: #eceff4;
+    --text-muted: #88c0d0;
+    --accent-color: #88c0d0;
+    --accent-text-color: #2e3440;
+  }
+
+  [data-theme="emerald"] {
+    --bg-page: #064e3b;
+    --bg-card: #047857;
+    --border-color: #059669;
+    --text-primary: #ecfdf5;
+    --text-muted: #a7f3d0;
+    --accent-color: #34d399;
+    --accent-text-color: #064e3b;
+  }
+
+  [data-theme="sakura"] {
+    --bg-page: #fdf2f4;
+    --bg-card: #ffffff;
+    --border-color: #fbcfe8;
+    --text-primary: #831843;
+    --text-muted: #be185d;
+    --accent-color: #db2777;
+    --accent-text-color: #ffffff;
+  }
+
+  [data-theme="sepia"] {
+    --bg-page: #f4ebd9;
+    --bg-card: #fdf6e3;
+    --border-color: #e0d5c1;
+    --text-primary: #433422;
+    --text-muted: #8c7b6c;
+    --accent-color: #b45309;
+    --accent-text-color: #ffffff;
+  }
+
+  body {
+    background-color: var(--bg-page);
+    color: var(--text-primary);
+    transition: background-color 0.25s ease, color 0.25s ease;
+  }
 }
