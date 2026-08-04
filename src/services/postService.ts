@@ -15,14 +15,14 @@ export const postService = {
 
     const queryString = new URLSearchParams(filteredParams).toString();
     const response = await fetch(`${BASE_URL}/posts?${queryString}`, {
-      headers: getHeaders(false),
+      headers: getHeaders(true),
     });
     return handleResponse<PostResponse[]>(response);
   },
 
   getPostById: async (postId: number): Promise<PostResponse> => {
     const response = await fetch(`${BASE_URL}/posts/${postId}`, {
-      headers: getHeaders(false),
+      headers: getHeaders(true),
     });
     return handleResponse<PostResponse>(response);
   },

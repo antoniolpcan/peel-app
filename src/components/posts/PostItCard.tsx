@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { PostResponse } from '@/services/types';
+import { useAuth } from '@/contexts/AuthContext';
 import { formatRelativeDate } from '@/utils/formatDate';
 import { LikeButton } from '@/components/ui/LikeButton';
 import { DeleteButton } from '@/components/ui/DeleteButton';
@@ -14,7 +15,10 @@ interface PostItCardProps {
 }
 
 export function PostItCard({ post, rotateClass = '', onClick, onLike, onDelete }: PostItCardProps) {
+  const { loggedUserId } = useAuth();
   const [isDeleting, setIsDeleting] = useState(false);
+
+  const isOwner = loggedUserId === post.user_id;
 
   const handleDeleteClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -52,9 +56,15 @@ export function PostItCard({ post, rotateClass = '', onClick, onLike, onDelete }
       <div className="flex justify-between items-center mt-4 text-xs text-slate-700/80 border-t border-black/10 pt-4">
         <span>{formatRelativeDate(post.created_at)}</span>
 
-        <div className="flex gap-4">
-          <LikeButton likes={post.likes ?? 0} onClick={(e) => onLike(e, post.id)} />
-          <DeleteButton onClick={handleDeleteClick} />
+        <div className="flex gap-2 items-center">
+          <LikeButton 
+            likes={post.likes ?? 0} 
+            isLiked={post.is_liked} 
+            onClick={(e) => onLike(e, post.id)} 
+          />
+          {isOwner && (
+            <DeleteButton onClick={handleDeleteClick} />
+          )}
         </div>
       </div>
     </div>

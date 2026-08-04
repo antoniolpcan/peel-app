@@ -1,13 +1,13 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { usePosts } from '@/hooks/usePosts';
 import { useColors } from '@/hooks/useColors';
 
 import { PageLayout } from '@/components/layout/PageLayout';
-import { PostItGrid } from '@/components/posts/PostItGrid';
+import { PostPinboard } from '@/components/posts/PostPinboard';
 import { PostModalsManager } from '@/components/posts/PostModalsManager';
 import { ColorFilter } from '@/components/ui/ColorFilter';
 import { SearchInput } from '@/components/ui/SearchInput';
-import { PinboardHeader } from '@/components/posts/PinBoardHeader';
+import { PinboardHeader } from '@/components/posts/PinboardHeader';
 
 export function Feed() {
   const {
@@ -28,16 +28,6 @@ export function Feed() {
   const [search, setSearch] = useState('');
   const [selectedColorId, setSelectedColorId] = useState<number | null>(null);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 200) {
-        fetchMorePosts();
-      }
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [fetchMorePosts]);
-
   const filteredPosts = posts.filter((post) => {
     if (selectedColorId !== null && post.color_id !== selectedColorId) return false;
 
@@ -52,6 +42,8 @@ export function Feed() {
     return titleMatch || bodyMatch || authorNameMatch || authorUsernameMatch;
   });
 
+  const hasActiveFilters = Boolean(search.trim()) || selectedColorId !== null;
+
   return (
     <PageLayout onOpenCreateModal={() => setIsModalOpen(true)}>
       <PinboardHeader title="Mural Público" subtitle="Veja o que as pessoas andam colando por aí.">
@@ -59,34 +51,21 @@ export function Feed() {
         <SearchInput value={search} onChange={setSearch} placeholder="Pesquisar por post, @username..." />
       </PinboardHeader>
 
-      {posts.length === 0 && loading ? (
-        <div className="text-center py-20 text-app-muted animate-pulse">
-          Carregando mural...
-        </div>
-      ) : error ? (
-        <div className="text-center py-20 text-red-500">{error}</div>
-      ) : filteredPosts.length === 0 ? (
-        <div className="text-center py-20 bg-app-card rounded-3xl border border-app-border shadow-xs transition-colors">
-          <p className="text-app-muted text-lg">Nenhum post-it encontrado.</p>
-        </div>
+      {error ? (
+        <div className="text-center py-20 text-red-500 font-medium">{error}</div>
       ) : (
-        <>
-          <PostItGrid posts={filteredPosts} handleLike={handleLike} handleDelete={handleDelete} setSelectedPost={setSelectedPost} />
-
-          {loading && (
-            <div className="flex justify-center items-center py-8">
-              <p className="text-sm font-medium text-app-muted animate-pulse flex items-center gap-2">
-                <span>📌</span> Buscando mais post-its...
-              </p>
-            </div>
-          )}
-
-          {!hasMore && (
-            <div className="text-center py-10 text-xs text-app-muted">
-              🎉 Você chegou ao fim do mural!
-            </div>
-          )}
-        </>
+        <PostPinboard
+          posts={filteredPosts}
+          loading={loading}
+          hasMore={hasMore}
+          hasActiveFilters={hasActiveFilters}
+          emptyMessage="Ainda não há nenhum post-it no mural."
+          endOfListMessage="Você chegou ao fim do mural!"
+          onFetchMore={fetchMorePosts}
+          onLike={handleLike}
+          onDelete={handleDelete}
+          onSelectPost={setSelectedPost}
+        />
       )}
 
       <PostModalsManager

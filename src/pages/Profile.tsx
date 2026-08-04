@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { Loader2, SearchX } from 'lucide-react';
+
 import { useAuth } from '@/contexts/AuthContext';
 import { useUser } from '@/hooks/useUsers';
 import { usePosts } from '@/hooks/usePosts';
@@ -8,7 +10,7 @@ import { useProfileEdit } from '@/hooks/useProfileEdit';
 import { useProfileFollow } from '@/hooks/useProfileFollow';
 
 import { PageLayout } from '@/components/layout/PageLayout';
-import { PostItGrid } from '@/components/posts/PostItGrid';
+import { PostPinboard } from '@/components/posts/PostPinboard';
 import { PostModalsManager } from '@/components/posts/PostModalsManager';
 
 import { ImageCropModal } from '@/components/ui/ImageCropModal';
@@ -16,7 +18,7 @@ import { ColorFilter } from '@/components/ui/ColorFilter';
 import { FollowListModal } from '@/components/profile/FollowListModal';
 import { ProfileHeader } from '@/components/profile/ProfileHeader';
 import { ProfileEditForm } from '@/components/profile/ProfileEditForm';
-import { PinboardHeader } from '@/components/posts/PinBoardHeader';
+import { PinboardHeader } from '@/components/posts/PinboardHeader';
 
 export function Profile() {
   const { loggedUserId, isAuthenticated } = useAuth();
@@ -28,7 +30,17 @@ export function Profile() {
   const { user, loading: isFetching, refetch: refetchUser } = useUser(profileUserId);
   const { colors } = useColors();
 
-  const { posts, selectedPost, setSelectedPost, refetch: fetchPosts, handleLike, handleDelete } = usePosts({
+  const { 
+    posts, 
+    selectedPost, 
+    setSelectedPost, 
+    loading: isPostsLoading,
+    hasMore,
+    fetchMorePosts,
+    refetch: fetchPosts, 
+    handleLike, 
+    handleDelete 
+  } = usePosts({
     user_id: profileUserId || undefined,
   });
 
@@ -51,8 +63,8 @@ export function Profile() {
   if (isFetching) {
     return (
       <PageLayout>
-        <div className="flex flex-col items-center justify-center py-32 text-app-muted font-medium animate-pulse">
-          <span className="text-2xl mb-2">🌿</span>
+        <div className="flex flex-col items-center justify-center py-32 text-app-muted font-medium">
+          <Loader2 className="w-8 h-8 animate-spin text-app-accent mb-2" />
           <p>Carregando perfil...</p>
         </div>
       </PageLayout>
@@ -62,7 +74,8 @@ export function Profile() {
   if (!user) {
     return (
       <PageLayout>
-        <div className="flex flex-col items-center justify-center py-32 text-app-muted">
+        <div className="flex flex-col items-center justify-center py-32 text-app-muted gap-2">
+          <SearchX className="w-10 h-10 text-app-muted/60" />
           <p className="text-lg font-semibold">Usuário não encontrado.</p>
         </div>
       </PageLayout>
@@ -112,7 +125,22 @@ export function Profile() {
           <ColorFilter colors={colors} selectedColorId={selectedColorId} onSelectColor={setSelectedColorId} />
         </PinboardHeader>
 
-        <PostItGrid posts={filteredPosts} handleLike={handleLike} handleDelete={handleDelete} setSelectedPost={setSelectedPost} />
+        <PostPinboard
+          posts={filteredPosts}
+          loading={isPostsLoading}
+          hasMore={hasMore}
+          hasActiveFilters={selectedColorId !== null}
+          emptyMessage={
+            isOwnProfile
+              ? 'Você ainda não colou nenhum post-it.'
+              : `${user.name} ainda não publicou nenhum post-it.`
+          }
+          endOfListMessage={`Você viu todos os post-its de ${user.name}!`}
+          onFetchMore={fetchMorePosts}
+          onLike={handleLike}
+          onDelete={handleDelete}
+          onSelectPost={setSelectedPost}
+        />
       </section>
 
       <PostModalsManager
@@ -129,6 +157,8 @@ export function Profile() {
         loading={follow.followModalType === 'followers' ? follow.loadingFollowers : follow.loadingFollowing}
         users={(follow.followModalType === 'followers' ? follow.followers : follow.following) as any[]}
         onClose={() => follow.setFollowModalType(null)}
+        onToggleFollow={(userId) => follow.handleToggleFollow(userId)}
+        isOwnProfile={isOwnProfile}
       />
 
       {edit.tempImageSrc && (

@@ -3,7 +3,12 @@ import { useFollowStats, useFollowers, useFollowing } from '@/hooks/useFollows';
 import { useFollowActions } from '@/hooks';
 import { useToast } from '@/contexts/ToastContext';
 
-export function useProfileFollow(profileUserId: number, loggedUserId?: number | null, isOwnProfile?: boolean, userName?: string) {
+export function useProfileFollow(
+  profileUserId: number, 
+  loggedUserId?: number | null, 
+  isOwnProfile?: boolean, 
+  userName?: string
+) {
   const { addToast } = useToast();
   const { stats, refetch: refetchStats } = useFollowStats(profileUserId);
   const { followers, loading: loadingFollowers, refetch: fetchFollowers } = useFollowers(profileUserId);
@@ -22,19 +27,42 @@ export function useProfileFollow(profileUserId: number, loggedUserId?: number | 
     }
   }, [followers, loggedUserId, isOwnProfile]);
 
-  const handleToggleFollow = async () => {
-    const action = isFollowingState ? unfollowUser : followUser;
-    const success = await action(profileUserId);
+  const handleToggleFollow = async (targetId?: number) => {
+    const targetUserId = targetId || profileUserId;
+
+    if (!targetUserId || targetUserId === loggedUserId) return;
+
+    const isPageOwner = targetUserId === profileUserId;
+    
+    let isCurrentlyFollowing = isPageOwner ? isFollowingState : false;
+
+    if (!isPageOwner) {
+      const foundInFollowing = following.some((f: any) => {
+        const uId = f.following?.id || f.following_id || f.id;
+        return uId === targetUserId;
+      });
+      isCurrentlyFollowing = foundInFollowing;
+    }
+
+    const action = isCurrentlyFollowing ? unfollowUser : followUser;
+    const success = await action(targetUserId);
 
     if (success) {
-      const nextState = !isFollowingState;
-      setIsFollowingState(nextState);
+      const nextState = !isCurrentlyFollowing;
+
+      if (isPageOwner) {
+        setIsFollowingState(nextState);
+      }
+
       refetchStats();
       fetchFollowers();
-      addToast(
-        nextState ? `Agora você está seguindo ${userName}!` : `Você deixou de seguir ${userName}`,
-        nextState ? 'success' : 'info'
-      );
+      fetchFollowing();
+
+      const toastMessage = isPageOwner 
+        ? (nextState ? `Agora você está seguindo ${userName}!` : `Você deixou de seguir ${userName}`)
+        : (nextState ? 'Usuário seguido com sucesso!' : 'Você deixou de seguir este usuário.');
+
+      addToast(toastMessage, nextState ? 'success' : 'info');
     } else {
       addToast('Erro ao atualizar status de seguidor.', 'error');
     }

@@ -13,6 +13,7 @@ export interface PostResponse {
   body: string;
   user_id: number;
   created_at: string;
+  is_liked: boolean;
   user: BasicUserResponse;
   likes?: number;
   color_id?: number | null;

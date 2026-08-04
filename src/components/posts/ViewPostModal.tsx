@@ -1,9 +1,10 @@
 import { useState } from 'react';
+import { MessageSquare } from 'lucide-react';
 import type { PostResponse } from '@/services/types';
 import { useAuth } from '@/contexts/AuthContext';
 import { useComments } from '@/hooks/usePosts';
 
-import { ModalLayout } from '@/components/ui/ModalLayout';
+import { ModalLayout } from '@/components/layout/ModalLayout';
 import { PostItNote } from '@/components/ui/PostItNote';
 import { LikeButton } from '@/components/ui/LikeButton';
 import { CommentList } from './CommentList';
@@ -34,7 +35,7 @@ export function ViewPostModal({ post, onClose, handleLike }: ViewPostModalProps)
 
   return (
     <ModalLayout onClose={onClose} maxWidthClass="max-w-2xl">
-      <div className="overflow-y-visible flex flex-col gap-6">
+      <div className="flex-1 overflow-y-auto pr-1 flex flex-col gap-6">
         <PostItNote hexCode={post.color?.hex_code} className="shadow-xs flex flex-col gap-3">
           <UserBadge userId={post.user_id} onNavigate={onClose} />
 
@@ -43,19 +44,26 @@ export function ViewPostModal({ post, onClose, handleLike }: ViewPostModalProps)
 
           <div className="flex justify-between items-center text-xs text-slate-600/70 pt-3 border-t border-black/5 mt-2">
             <span>{new Date(post.created_at || '').toLocaleDateString()}</span>
-            <LikeButton likes={post.likes ?? 0} onClick={handleLikeClick} disabled={isLiking} variant="modal" />
+            <LikeButton 
+              likes={post.likes ?? 0} 
+              isLiked={post.is_liked} 
+              onClick={handleLikeClick} 
+              disabled={isLiking} 
+              variant="modal" 
+            />
           </div>
         </PostItNote>
 
-        <div className="px-2 overflow-visible">
+        <div className="px-2">
           <h3 className="font-bold text-app-text text-base mb-4 flex items-center gap-2 transition-colors">
-            <span>💬</span> Comentários {!isLoadingComments && `(${comments.length})`}
+            <MessageSquare className="w-4 h-4 text-app-accent" />
+            <span>Comentários {!isLoadingComments && `(${comments.length})`}</span>
           </h3>
           <CommentList comments={comments} isLoading={isLoadingComments} onNavigate={onClose} />
         </div>
       </div>
 
-      <div className="mt-4 pt-4 border-t border-app-border shrink-0 transition-colors">
+      <div className="mt-4 pt-4 border-t border-app-border shrink-0 bg-app-card transition-colors sticky bottom-0">
         {isAuthenticated ? (
           <CommentForm onSubmitComment={async (text) => Boolean(await createComment(text))} />
         ) : (
