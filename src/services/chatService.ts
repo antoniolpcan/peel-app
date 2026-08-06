@@ -1,5 +1,5 @@
 import { BASE_URL, getHeaders, apiFetch } from './apiClient';
-import type { ChatResponse, MessageCreate, MessageResponse } from './types';
+import type { ChatResponse, MessageCreate, MessageResponse, UnreadSummaryResponse } from './types';
 
 export const chatService = {
   startDirectChat: async (targetUserId: number): Promise<ChatResponse> => {
@@ -11,6 +11,12 @@ export const chatService = {
 
   listMyChats: async (): Promise<ChatResponse[]> => {
     return apiFetch<ChatResponse[]>(`${BASE_URL}/chat/`, {
+      headers: getHeaders(true),
+    });
+  },
+
+  getUnreadSummary: async (): Promise<UnreadSummaryResponse> => {
+    return apiFetch<UnreadSummaryResponse>(`${BASE_URL}/chat/unread`, {
       headers: getHeaders(true),
     });
   },

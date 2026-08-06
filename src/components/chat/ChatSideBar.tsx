@@ -1,10 +1,11 @@
 import { memo } from 'react';
 import { MessageSquare, Search, Loader2 } from 'lucide-react';
 import { ChatItem } from './ChatItem';
-import type { ChatResponse, BasicUserResponse } from '@/services/types';
+import type { ChatResponse, BasicUserResponse, UnreadSenderResponse } from '@/services/types';
 
 interface ChatSidebarProps {
   chats: ChatResponse[];
+  unreadSenders?: UnreadSenderResponse[];
   selectedChatId: number | null;
   searchQuery: string;
   onSearchChange: (query: string) => void;
@@ -15,6 +16,7 @@ interface ChatSidebarProps {
 
 export const ChatSidebar = memo(function ChatSidebar({
   chats,
+  unreadSenders = [],
   selectedChatId,
   searchQuery,
   onSearchChange,
@@ -40,7 +42,8 @@ export const ChatSidebar = memo(function ChatSidebar({
             placeholder="Buscar conversa..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="w-full bg-app-bg text-app-text border border-app-border rounded-lg pl-8 pr-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-app-accent transition-all"
+            className="w-full bg-app-bg text-app-text border border-app-border rounded-lg pl-8 pr-3 
+              py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-app-accent transition-all"
           />
         </div>
       </div>
@@ -56,15 +59,32 @@ export const ChatSidebar = memo(function ChatSidebar({
             Nenhuma conversa encontrada.
           </p>
         ) : (
-          chats.map((chat) => (
-            <ChatItem
-              key={chat.id}
-              chat={chat}
-              otherUser={getOtherUser(chat)}
-              isSelected={selectedChatId === chat.id}
-              onSelect={onSelectChat}
-            />
-          ))
+          chats.map((chat) => {
+            const otherUser = getOtherUser(chat);
+            const senderUnread = unreadSenders.find(
+              (s) => s.user.id === otherUser?.id
+            );
+
+            const unreadCount =
+              senderUnread?.unread_count ??
+              Number(
+                (chat as any).unread_count ??
+                (chat as any).unread_messages_count ??
+                (chat as any).unreadCount ??
+                0
+              );
+
+            return (
+              <ChatItem
+                key={chat.id}
+                chat={chat}
+                otherUser={otherUser}
+                isSelected={selectedChatId === chat.id}
+                unreadCount={unreadCount}
+                onSelect={onSelectChat}
+              />
+            );
+          })
         )}
       </div>
     </aside>

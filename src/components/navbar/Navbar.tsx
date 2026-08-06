@@ -19,9 +19,8 @@ export const Navbar = memo(function Navbar({
   logout,
   setIsModalOpen,
 }: NavbarProps) {
-  
   const { unreadCount: unreadNotificationsCount } = useNotifications(isAuthenticated);
-  const { unreadCount: unreadMessagesCount } = useChat();
+  const { unreadCount: unreadMessagesCount } = useChat(isAuthenticated);
 
   const { updateSettings } = useUserSettings();
   const { setTheme } = useTheme();
@@ -51,6 +50,7 @@ export const Navbar = memo(function Navbar({
       <header className="bg-app-card/80 backdrop-blur-md border-b border-app-border px-6 py-3 sticky top-0 z-50 transition-colors">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <NavBrand />
+          
           <NavLinks 
             unreadNotificationsCount={unreadNotificationsCount}
             unreadMessagesCount={unreadMessagesCount}

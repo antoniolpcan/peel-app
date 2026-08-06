@@ -40,7 +40,9 @@ export function ChatPage() {
   const { loggedUserId } = useAuth();
   const { 
     chats, 
+    unreadSenders, 
     activeMessages, 
+    firstUnreadMessageId,
     loading, 
     error, 
     fetchMyChats, 
@@ -48,7 +50,7 @@ export function ChatPage() {
     sendMessage, 
     connectWebSocket, 
     disconnectWebSocket 
-  } = useChat();
+  } = useChat(true);
   
   const [selectedChatId, setSelectedChatId] = useState<number | null>(null);
   const [messageText, setMessageText] = useState('');
@@ -81,7 +83,7 @@ export function ChatPage() {
   const getOtherUser = useCallback(
     (chat: ChatResponse) => {
       const otherMember = chat.members?.find((m) => m.user_id !== loggedUserId);
-      return otherMember?.user ?? undefined;;
+      return otherMember?.user ?? undefined;
     },
     [loggedUserId]
   );
@@ -134,6 +136,7 @@ export function ChatPage() {
         <div className="grid grid-cols-1 md:grid-cols-12 border border-app-border rounded-2xl overflow-hidden bg-app-card shadow-sm flex-1 h-full min-h-0">
           <ChatSidebar
             chats={filteredChats}
+            unreadSenders={unreadSenders}
             selectedChatId={selectedChatId}
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
@@ -161,6 +164,7 @@ export function ChatPage() {
                   loading={loading}
                   messagesEndRef={messagesEndRef}
                   formatDateDivider={formatDateDivider}
+                  firstUnreadMessageId={firstUnreadMessageId}
                 />
 
                 <ChatMessageInput

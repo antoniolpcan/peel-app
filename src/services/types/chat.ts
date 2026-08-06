@@ -25,3 +25,13 @@ export interface MessageResponse {
   created_at: string;
   sender?: BasicUserResponse | null;
 }
+
+export interface UnreadSenderResponse {
+  user: BasicUserResponse;
+  unread_count: number;
+}
+
+export interface UnreadSummaryResponse {
+  total_unread: number;
+  senders: UnreadSenderResponse[];
+}
