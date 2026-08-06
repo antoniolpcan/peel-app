@@ -4,6 +4,9 @@ import { Login } from '../pages/Login';
 import { Register } from '../pages/Register';
 import { Profile } from '../pages/Profile';
 import { PrivateRoute } from './PrivateRoute';
+import { NotificationsPage } from '@/pages/Notifications';
+import { ChatPage } from '@/pages/Chat';
+import { UserSettingsPage } from '@/pages/UserSettings';
 
 export function AppRoutes() {
   return (
@@ -13,6 +16,10 @@ export function AppRoutes() {
       <Route path="/register" element={<Register />} />
       <Route path="/perfil" element={<PrivateRoute><Profile /></PrivateRoute>} />
       <Route path="/perfil/:id" element={<Profile />} />
+      <Route path="/notifications" element={<NotificationsPage />} />
+      <Route path="/chat" element={<ChatPage />} />
+      <Route path="/chat/:chatId" element={<ChatPage />} />
+      <Route path="/settings" element={<UserSettingsPage />} />
     </Routes>
   );
 }

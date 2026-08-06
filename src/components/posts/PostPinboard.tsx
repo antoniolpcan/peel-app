@@ -1,7 +1,8 @@
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { Loader2, SearchX, CheckCircle2, StickyNote } from 'lucide-react';
 import type { PostResponse } from '@/services/types';
 import { PostItGrid } from './PostItGrid';
+import { PostItSkeleton } from './PostItSkeleton';
 
 interface PostPinboardProps {
   posts: PostResponse[];
@@ -29,23 +30,25 @@ export function PostPinboard({
   endOfListMessage = 'Você chegou ao fim do mural!',
 }: PostPinboardProps) {
 
+  const handleScroll = useCallback(() => {
+    if (loading || !hasMore) return;
+
+    const scrollThreshold = 300;
+    const isNearBottom = 
+      window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - scrollThreshold;
+
+    if (isNearBottom) {
+      onFetchMore();
+    }
+  }, [loading, hasMore, onFetchMore]);
+
   useEffect(() => {
-    const handleScroll = () => {
-      if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 200) {
-        onFetchMore();
-      }
-    };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [onFetchMore]);
+  }, [handleScroll]);
 
   if (posts.length === 0 && loading) {
-    return (
-      <div className="flex flex-col items-center justify-center py-20 text-app-muted gap-3">
-        <Loader2 className="w-8 h-8 animate-spin text-app-accent" />
-        <p className="text-sm font-medium">Carregando post-its...</p>
-      </div>
-    );
+    return <PostItSkeleton count={6} />;
   }
 
   if (posts.length === 0) {

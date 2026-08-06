@@ -1,8 +1,9 @@
 import type { MediaFileBase } from './base';
 
 export interface BasicUserResponse {
+  id: number;
   name: string;
-  username?: string | null;
+  username: string;
   bio?: string | null;
   avatar?: MediaFileBase | null;
   created_at: string;

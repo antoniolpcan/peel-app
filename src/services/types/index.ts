@@ -4,3 +4,6 @@ export * from './user';
 export * from './post';
 export * from './comment';
 export * from './follow';
+export * from './chat';
+export * from './userSettings';
+export * from './notification';

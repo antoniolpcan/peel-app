@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState, useEffect, useRef, useCallback, memo } from 'react';
 import type { PostResponse } from '@/services/types';
 import { useAuth } from '@/contexts/AuthContext';
 import { formatRelativeDate } from '@/utils/formatDate';
@@ -14,22 +14,40 @@ interface PostItCardProps {
   onDelete: (e: React.MouseEvent, id: number) => void;
 }
 
-export function PostItCard({ post, rotateClass = '', onClick, onLike, onDelete }: PostItCardProps) {
+export const PostItCard = memo(function PostItCard({
+  post,
+  rotateClass = '',
+  onClick,
+  onLike,
+  onDelete,
+}: PostItCardProps) {
   const { loggedUserId } = useAuth();
   const [isDeleting, setIsDeleting] = useState(false);
+  const timeoutRef = useRef<number | null>(null);
 
   const isOwner = loggedUserId === post.user_id;
+  const backgroundColor = post.color?.hex_code || '#FEF08A';
 
-  const handleDeleteClick = async (e: React.MouseEvent) => {
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
+
+  const handleDeleteClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     setIsDeleting(true);
 
-    setTimeout(() => {
+    timeoutRef.current = setTimeout(() => {
       onDelete(e, post.id);
     }, 400);
-  };
+  }, [post.id, onDelete]);
 
-  const backgroundColor = post.color?.hex_code || '#FEF08A';
+  const handleLikeClick = useCallback((e: React.MouseEvent) => {
+    onLike(e, post.id);
+  }, [post.id, onLike]);
 
   return (
     <div
@@ -43,7 +61,7 @@ export function PostItCard({ post, rotateClass = '', onClick, onLike, onDelete }
         filter: 'saturate(1.25) contrast(1.05)',
       }}
     >
-      <UserBadge userId={post.user_id} />
+      <UserBadge userId={post.user_id} user={post.user} />
 
       <h2 className="text-xl font-bold mb-2 text-slate-900 leading-snug">
         {post.title}
@@ -60,7 +78,7 @@ export function PostItCard({ post, rotateClass = '', onClick, onLike, onDelete }
           <LikeButton 
             likes={post.likes ?? 0} 
             isLiked={post.is_liked} 
-            onClick={(e) => onLike(e, post.id)} 
+            onClick={handleLikeClick} 
           />
           {isOwner && (
             <DeleteButton onClick={handleDeleteClick} />
@@ -69,4 +87,4 @@ export function PostItCard({ post, rotateClass = '', onClick, onLike, onDelete }
       </div>
     </div>
   );
-}
+});

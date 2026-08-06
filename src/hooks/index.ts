@@ -8,3 +8,6 @@ export * from './useStorage';
 export * from './useProfileEdit';
 export * from './useProfileFollow';
 
+export * from './useNotifications';
+export * from './useChat';
+export * from './useUserSettings';

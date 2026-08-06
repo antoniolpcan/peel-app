@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Eye, EyeOff } from 'lucide-react';
 import { useUserActions } from '@/hooks/useUsers';
 import { useToast } from '@/contexts/ToastContext';
 import { AuthLayout } from '@/components/auth/AuthLayout';
@@ -14,30 +15,42 @@ export function Register() {
     email: '',
     password: '',
   });
+  const [showPassword, setShowPassword] = useState(false);
 
   const { createUser, loading, error } = useUserActions();
   const navigate = useNavigate();
   const { addToast } = useToast();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-  };
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    
+    const sanitizedValue = name === 'username' ? value.replace(/^@/, '') : value;
 
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
+    setFormData((prev) => ({ ...prev, [name]: sanitizedValue }));
+  }, []);
 
-    const newUser = await createUser({
-      name: formData.name,
-      email: formData.email,
-      password: formData.password,
-      username: formData.username.trim() !== '' ? formData.username : null,
-    });
+  const handleRegister = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
 
-    if (newUser) {
-      addToast('Conta criada com sucesso! Faça login para continuar. ✨', 'success');
-      navigate('/login');
-    }
-  };
+      if (!formData.name.trim() || !formData.email.trim() || !formData.password) return;
+
+      const formattedUsername = formData.username.trim();
+
+      const newUser = await createUser({
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        password: formData.password,
+        username: formattedUsername !== '' ? formattedUsername : null,
+      });
+
+      if (newUser) {
+        addToast('Conta criada com sucesso! Faça login para continuar. ✨', 'success');
+        navigate('/login');
+      }
+    },
+    [formData, createUser, addToast, navigate]
+  );
 
   return (
     <AuthLayout
@@ -47,62 +60,93 @@ export function Register() {
       footerLinkText="Fazer Login"
       footerLinkTo="/login"
     >
-      {error && <ErrorMessage message={error} />}
+      {error && <ErrorMessage message={error} className="mb-2" />}
 
       <form onSubmit={handleRegister} className="flex flex-col gap-3.5">
         <div className="space-y-1">
-          <label className="text-xs font-semibold text-app-muted ml-1">
+          <label htmlFor="register-name" className="text-xs font-semibold text-app-muted ml-1">
             Seu Nome
           </label>
           <Input
+            id="register-name"
             name="name"
             type="text"
+            autoComplete="name"
             placeholder="Como quer ser chamado?"
             value={formData.name}
             onChange={handleChange}
+            disabled={loading}
             required
+            autoFocus
           />
         </div>
 
         <div className="space-y-1">
-          <label className="text-xs font-semibold text-app-muted ml-1">
-            Nome de Usuário <span className="font-normal opacity-70">(opcional)</span>
+          <label htmlFor="register-username" className="text-xs font-semibold text-app-muted ml-1">
+            Nome de Usuário
           </label>
           <Input
+            id="register-username"
             name="username"
             type="text"
+            autoComplete="username"
             placeholder="@seu_username"
             value={formData.username}
             onChange={handleChange}
+            disabled={loading}
+            required
           />
         </div>
 
         <div className="space-y-1">
-          <label className="text-xs font-semibold text-app-muted ml-1">
+          <label htmlFor="register-email" className="text-xs font-semibold text-app-muted ml-1">
             E-mail
           </label>
           <Input
+            id="register-email"
             name="email"
             type="email"
+            autoComplete="email"
             placeholder="seu@email.com"
             value={formData.email}
             onChange={handleChange}
+            disabled={loading}
             required
           />
         </div>
 
         <div className="space-y-1">
-          <label className="text-xs font-semibold text-app-muted ml-1">
+          <label htmlFor="register-password" className="text-xs font-semibold text-app-muted ml-1">
             Senha
           </label>
-          <Input
-            name="password"
-            type="password"
-            placeholder="Crie uma senha segura"
-            value={formData.password}
-            onChange={handleChange}
-            required
-          />
+          <div className="relative">
+            <Input
+              id="register-password"
+              name="password"
+              type={showPassword ? 'text' : 'password'}
+              autoComplete="new-password"
+              placeholder="Crie uma senha segura"
+              value={formData.password}
+              onChange={handleChange}
+              disabled={loading}
+              className="pr-10"
+              required
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((prev) => !prev)}
+              disabled={loading}
+              tabIndex={-1}
+              aria-label={showPassword ? 'Ocultar senha' : 'Exibir senha'}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-app-muted hover:text-app-text transition-colors cursor-pointer disabled:opacity-50"
+            >
+              {showPassword ? (
+                <EyeOff className="w-4 h-4 shrink-0" />
+              ) : (
+                <Eye className="w-4 h-4 shrink-0" />
+              )}
+            </button>
+          </div>
         </div>
 
         <Button 

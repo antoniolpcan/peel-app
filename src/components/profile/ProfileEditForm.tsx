@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback, memo } from 'react';
 import { Input } from '@/components/ui/Input';
 import { TextArea } from '@/components/ui/TextArea';
 import { Button } from '@/components/ui/Button';
@@ -15,7 +15,7 @@ interface ProfileEditFormProps {
   onCancel: () => void;
 }
 
-export function ProfileEditForm({
+export const ProfileEditForm = memo(function ProfileEditForm({
   editForm,
   setEditForm,
   avatarPreview,
@@ -25,6 +25,15 @@ export function ProfileEditForm({
   onSubmit,
   onCancel,
 }: ProfileEditFormProps) {
+  const isSubmitting = isUpdating || isUploadingImage;
+
+  const handleInputChange = useCallback(
+    (field: keyof typeof editForm) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      setEditForm((prev) => ({ ...prev, [field]: e.target.value }));
+    },
+    [setEditForm]
+  );
+
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-5 border-t border-app-border pt-6 transition-colors">
       <AvatarUploader
@@ -34,30 +43,42 @@ export function ProfileEditForm({
       />
 
       <div>
-        <label className="block text-sm font-medium text-app-text mb-1 transition-colors">Nome</label>
+        <label htmlFor="edit-name" className="block text-sm font-medium text-app-text mb-1 transition-colors">
+          Nome
+        </label>
         <Input
+          id="edit-name"
           type="text"
           value={editForm.name}
-          onChange={(e) => setEditForm((prev) => ({ ...prev, name: e.target.value }))}
+          onChange={handleInputChange('name')}
+          disabled={isSubmitting}
           required
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-app-text mb-1 transition-colors">Username</label>
+        <label htmlFor="edit-username" className="block text-sm font-medium text-app-text mb-1 transition-colors">
+          Username
+        </label>
         <Input
+          id="edit-username"
           type="text"
           value={editForm.username}
-          onChange={(e) => setEditForm((prev) => ({ ...prev, username: e.target.value }))}
+          onChange={handleInputChange('username')}
+          disabled={isSubmitting}
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-app-text mb-1 transition-colors">Bio</label>
+        <label htmlFor="edit-bio" className="block text-sm font-medium text-app-text mb-1 transition-colors">
+          Bio
+        </label>
         <TextArea
+          id="edit-bio"
           value={editForm.bio}
-          onChange={(e) => setEditForm((prev) => ({ ...prev, bio: e.target.value }))}
-          className="h-24"
+          onChange={handleInputChange('bio')}
+          disabled={isSubmitting}
+          className="h-24 resize-none"
           placeholder="Fale um pouco sobre você..."
         />
       </div>
@@ -66,14 +87,16 @@ export function ProfileEditForm({
         <button
           type="button"
           onClick={onCancel}
-          className="px-6 py-2 rounded-xl font-medium text-app-muted hover:text-app-text transition-colors cursor-pointer text-sm"
+          disabled={isSubmitting}
+          className="px-6 py-2 rounded-xl font-medium text-app-muted hover:text-app-text transition-colors cursor-pointer text-sm disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Cancelar
         </button>
         <Button
           type="submit"
-          isLoading={isUpdating || isUploadingImage}
+          isLoading={isSubmitting}
           loadingText="Salvando..."
+          disabled={isSubmitting}
           className="px-6 py-2 text-sm mt-0 shadow-none"
         >
           Salvar Alterações
@@ -81,4 +104,4 @@ export function ProfileEditForm({
       </div>
     </form>
   );
-}
+});

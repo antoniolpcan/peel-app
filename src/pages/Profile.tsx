@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { Loader2, SearchX } from 'lucide-react';
 
@@ -19,6 +19,7 @@ import { FollowListModal } from '@/components/profile/FollowListModal';
 import { ProfileHeader } from '@/components/profile/ProfileHeader';
 import { ProfileEditForm } from '@/components/profile/ProfileEditForm';
 import { PinboardHeader } from '@/components/posts/PinboardHeader';
+import type { BasicUserResponse } from '@/services/types';
 
 export function Profile() {
   const { loggedUserId, isAuthenticated } = useAuth();
@@ -58,7 +59,40 @@ export function Profile() {
     }
   }, [profileUserId]);
 
-  const filteredPosts = posts.filter((post) => selectedColorId === null || post.color_id === selectedColorId);
+  const handleOpenCreateModal = useCallback(() => {
+    setIsCreateModalOpen(true);
+  }, []);
+
+  const handleCloseCreateModal = useCallback(() => {
+    setIsCreateModalOpen(false);
+  }, []);
+
+  const handleSuccessCreateModal = useCallback(() => {
+    fetchPosts();
+    follow.refetchStats();
+  }, [fetchPosts, follow]);
+
+  const handleCloseViewModal = useCallback(() => {
+    setSelectedPost(null);
+  }, [setSelectedPost]);
+
+  const handleCloseFollowModal = useCallback(() => {
+    follow.setFollowModalType(null);
+  }, [follow]);
+
+  const handleCloseCropModal = useCallback(() => {
+    edit.setTempImageSrc(null);
+  }, [edit]);
+
+  const filteredPosts = useMemo(() => {
+    if (selectedColorId === null) return posts;
+    return posts.filter((post) => post.color_id === selectedColorId);
+  }, [posts, selectedColorId]);
+
+  const currentFollowUsers = useMemo(() => {
+    const list = follow.followModalType === 'followers' ? follow.followers : follow.following;
+    return (list || []) as unknown as BasicUserResponse[];
+  }, [follow.followModalType, follow.followers, follow.following]);
 
   if (isFetching) {
     return (
@@ -74,16 +108,17 @@ export function Profile() {
   if (!user) {
     return (
       <PageLayout>
-        <div className="flex flex-col items-center justify-center py-32 text-app-muted gap-2">
+        <div className="flex flex-col items-center justify-center py-32 text-app-muted gap-2 text-center">
           <SearchX className="w-10 h-10 text-app-muted/60" />
-          <p className="text-lg font-semibold">Usuário não encontrado.</p>
+          <p className="text-lg font-semibold text-app-text">Usuário não encontrado.</p>
+          <p className="text-xs text-app-muted">O perfil que você tentou acessar não existe ou foi removido.</p>
         </div>
       </PageLayout>
     );
   }
 
   return (
-    <PageLayout onOpenCreateModal={() => setIsCreateModalOpen(true)}>
+    <PageLayout onOpenCreateModal={handleOpenCreateModal}>
       <div className="bg-app-card rounded-3xl p-6 sm:p-8 border border-app-border shadow-xs mb-8 transition-colors">
         <ProfileHeader
           user={user}
@@ -122,7 +157,11 @@ export function Profile() {
 
       <section className="flex flex-col gap-8">
         <PinboardHeader title={`Mural de ${user.name}`}>
-          <ColorFilter colors={colors} selectedColorId={selectedColorId} onSelectColor={setSelectedColorId} />
+          <ColorFilter 
+            colors={colors} 
+            selectedColorId={selectedColorId} 
+            onSelectColor={setSelectedColorId} 
+          />
         </PinboardHeader>
 
         <PostPinboard
@@ -145,26 +184,26 @@ export function Profile() {
 
       <PostModalsManager
         isCreateOpen={isCreateModalOpen}
-        onCloseCreate={() => setIsCreateModalOpen(false)}
-        onSuccessCreate={fetchPosts}
+        onCloseCreate={handleCloseCreateModal}
+        onSuccessCreate={handleSuccessCreateModal}
         selectedPost={selectedPost}
-        onCloseView={() => setSelectedPost(null)}
+        onCloseView={handleCloseViewModal}
         onLikePost={handleLike}
       />
 
       <FollowListModal
         type={follow.followModalType}
         loading={follow.followModalType === 'followers' ? follow.loadingFollowers : follow.loadingFollowing}
-        users={(follow.followModalType === 'followers' ? follow.followers : follow.following) as any[]}
-        onClose={() => follow.setFollowModalType(null)}
-        onToggleFollow={(userId) => follow.handleToggleFollow(userId)}
+        users={currentFollowUsers}
+        onClose={handleCloseFollowModal}
+        onToggleFollow={follow.handleToggleFollow}
         isOwnProfile={isOwnProfile}
       />
 
       {edit.tempImageSrc && (
         <ImageCropModal
           imageSrc={edit.tempImageSrc}
-          onClose={() => edit.setTempImageSrc(null)}
+          onClose={handleCloseCropModal}
           onCropComplete={edit.handleCropComplete}
         />
       )}

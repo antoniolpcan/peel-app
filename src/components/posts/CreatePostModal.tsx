@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, memo } from 'react';
 import { StickyNote, Send, Loader2 } from 'lucide-react';
 import { useColors } from '@/hooks/useColors';
 import { usePostActions } from '@/hooks/usePosts';
@@ -13,7 +13,7 @@ interface CreatePostModalProps {
   onSuccess: () => void;
 }
 
-export function CreatePostModal({ onClose, onSuccess }: CreatePostModalProps) {
+export const CreatePostModal = memo(function CreatePostModal({ onClose, onSuccess }: CreatePostModalProps) {
   const { addToast } = useToast();
   const { colors, loading: isLoadingColors } = useColors();
   const { createPost, loading: isLoading } = usePostActions();
@@ -28,17 +28,23 @@ export function CreatePostModal({ onClose, onSuccess }: CreatePostModalProps) {
     }
   }, [colors, selectedColorId]);
 
-  const currentColor = colors.find((c) => c.id === selectedColorId) || colors[0];
+  const currentColor = useMemo(() => {
+    return colors.find((c) => c.id === selectedColorId) || colors[0];
+  }, [colors, selectedColorId]);
 
-  const onSubmit = async () => {
+  const handleSubmit = useCallback(async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+
+    if (isLoading) return;
+
     if (!title.trim() || !body.trim()) {
       addToast('Preencha o título e o corpo da nota!', 'info');
       return;
     }
 
     const created = await createPost({
-      title,
-      body,
+      title: title.trim(),
+      body: body.trim(),
       color_id: currentColor?.id || null,
     });
 
@@ -46,11 +52,11 @@ export function CreatePostModal({ onClose, onSuccess }: CreatePostModalProps) {
       onSuccess();
       onClose();
     }
-  };
+  }, [title, body, currentColor, isLoading, createPost, addToast, onSuccess, onClose]);
 
   return (
     <ModalLayout onClose={onClose} maxWidthClass="max-w-2xl">
-      <div className="flex flex-col gap-5">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-5">
         
         <div className="flex justify-between items-center pb-3 border-b border-app-border transition-colors">
           <h3 className="text-lg font-bold text-app-text flex items-center gap-2 transition-colors">
@@ -72,6 +78,7 @@ export function CreatePostModal({ onClose, onSuccess }: CreatePostModalProps) {
               onChange={(e) => setTitle(e.target.value)}
               className="text-xl font-bold bg-transparent outline-none 
               placeholder:text-slate-700/50 text-slate-800 mb-3"
+              disabled={isLoading}
             />
 
             <textarea
@@ -80,6 +87,7 @@ export function CreatePostModal({ onClose, onSuccess }: CreatePostModalProps) {
               onChange={(e) => setBody(e.target.value)}
               className="w-full grow bg-transparent outline-none resize-none 
               placeholder:text-slate-700/40 text-slate-800 text-base leading-relaxed"
+              disabled={isLoading}
             />
           </PostItNote>
         )}
@@ -98,17 +106,18 @@ export function CreatePostModal({ onClose, onSuccess }: CreatePostModalProps) {
             <button
               type="button"
               onClick={onClose}
+              disabled={isLoading}
               className="px-4 py-2.5 text-sm font-medium text-app-muted 
-              hover:text-app-text rounded-xl transition-colors cursor-pointer"
+              hover:text-app-text rounded-xl transition-colors cursor-pointer disabled:opacity-50"
             >
               Cancelar
             </button>
             
             <Button
-              type="button"
-              onClick={onSubmit}
+              type="submit"
               isLoading={isLoading}
               loadingText="Colando..."
+              disabled={!title.trim() || !body.trim() || isLoading}
               className="px-5 py-2.5 text-sm mt-0 shadow-md inline-flex items-center justify-center gap-2 whitespace-nowrap shrink-0"
             >
               <Send className="w-4 h-4 shrink-0" />
@@ -118,7 +127,7 @@ export function CreatePostModal({ onClose, onSuccess }: CreatePostModalProps) {
 
         </div>
 
-      </div>
+      </form>
     </ModalLayout>
   );
-}
+});

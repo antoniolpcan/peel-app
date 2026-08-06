@@ -1,4 +1,6 @@
+import React, { useCallback, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import type { MediaFileBase } from '@/services/types';
 import { UserAvatar } from './UserAvatar';
 import { useAuth } from '@/contexts/AuthContext';
 import { FollowButton } from '../ui/FollowButton';
@@ -7,8 +9,8 @@ interface FollowListItemProps {
   user: {
     id: number;
     name: string;
-    username?: string;
-    avatar?: any;
+    username: string;
+    avatar?: MediaFileBase | string | null;
     is_following?: boolean;
   };
   isLoading?: boolean;
@@ -16,28 +18,43 @@ interface FollowListItemProps {
   onCloseModal?: () => void;
 }
 
-export function FollowListItem({ user, isLoading, onToggleFollow, onCloseModal }: FollowListItemProps) {
+export const FollowListItem = memo(function FollowListItem({
+  user,
+  isLoading = false,
+  onToggleFollow,
+  onCloseModal,
+}: FollowListItemProps) {
   const navigate = useNavigate();
   const { loggedUserId, isAuthenticated } = useAuth();
 
   const isOwnUser = loggedUserId === user.id;
 
-  const handleUserClick = () => {
+  const handleUserClick = useCallback(() => {
     if (onCloseModal) onCloseModal();
     navigate(`/perfil/${user.id}`);
-  };
+  }, [navigate, onCloseModal, user.id]);
 
-  const handleFollowClick = (e: React.MouseEvent) => {
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      handleUserClick();
+    }
+  }, [handleUserClick]);
+
+  const handleFollowClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     if (onToggleFollow) {
       onToggleFollow(user.id);
     }
-  };
+  }, [onToggleFollow, user.id]);
 
   return (
     <li 
+      role="button"
+      tabIndex={0}
       onClick={handleUserClick}
-      className="flex items-center justify-between gap-3 p-2.5 hover:bg-app-bg/60 rounded-2xl transition-colors cursor-pointer group"
+      onKeyDown={handleKeyDown}
+      className="flex items-center justify-between gap-3 p-2.5 hover:bg-app-bg/60 rounded-2xl transition-colors cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/50"
     >
       <div className="flex items-center gap-3 min-w-0">
         <UserAvatar
@@ -56,6 +73,7 @@ export function FollowListItem({ user, isLoading, onToggleFollow, onCloseModal }
           )}
         </div>
       </div>
+
       {isAuthenticated && !isOwnUser && onToggleFollow && (
         <div className="shrink-0">
           <FollowButton
@@ -68,4 +86,4 @@ export function FollowListItem({ user, isLoading, onToggleFollow, onCloseModal }
       )}
     </li>
   );
-}
+});

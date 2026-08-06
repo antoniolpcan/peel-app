@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { usePosts } from '@/hooks/usePosts';
 import { useColors } from '@/hooks/useColors';
 
@@ -8,6 +8,12 @@ import { PostModalsManager } from '@/components/posts/PostModalsManager';
 import { ColorFilter } from '@/components/ui/ColorFilter';
 import { SearchInput } from '@/components/ui/SearchInput';
 import { PinboardHeader } from '@/components/posts/PinboardHeader';
+import type { BasicUserResponse } from '@/services/types';
+
+type PostWithUser = {
+  user?: BasicUserResponse | null;
+  author?: BasicUserResponse | null;
+};
 
 export function Feed() {
   const {
@@ -28,31 +34,71 @@ export function Feed() {
   const [search, setSearch] = useState('');
   const [selectedColorId, setSelectedColorId] = useState<number | null>(null);
 
-  const filteredPosts = posts.filter((post) => {
-    if (selectedColorId !== null && post.color_id !== selectedColorId) return false;
+  const handleOpenCreateModal = useCallback(() => {
+    setIsModalOpen(true);
+  }, []);
 
+  const handleCloseCreateModal = useCallback(() => {
+    setIsModalOpen(false);
+  }, []);
+
+  const handleCloseViewModal = useCallback(() => {
+    setSelectedPost(null);
+  }, [setSelectedPost]);
+
+  const handleSuccessCreate = useCallback(() => {
+    fetchPosts();
+  }, [fetchPosts]);
+
+  const filteredPosts = useMemo(() => {
     const searchLower = search.toLowerCase().trim();
-    if (!searchLower) return true;
 
-    const titleMatch = post.title?.toLowerCase().includes(searchLower) || false;
-    const bodyMatch = post.body?.toLowerCase().includes(searchLower) || false;
-    const authorNameMatch = (post as any).user?.name?.toLowerCase().includes(searchLower) || false;
-    const authorUsernameMatch = (post as any).user?.username?.toLowerCase().includes(searchLower) || false;
+    return posts.filter((post) => {
+      if (selectedColorId !== null && post.color_id !== selectedColorId) {
+        return false;
+      }
 
-    return titleMatch || bodyMatch || authorNameMatch || authorUsernameMatch;
-  });
+      if (!searchLower) return true;
 
-  const hasActiveFilters = Boolean(search.trim()) || selectedColorId !== null;
+      const postWithUser = post as typeof post & PostWithUser;
+      const author = postWithUser.user || postWithUser.author;
+
+      const titleMatch = post.title?.toLowerCase().includes(searchLower) ?? false;
+      const bodyMatch = post.body?.toLowerCase().includes(searchLower) ?? false;
+      const authorNameMatch = author?.name?.toLowerCase().includes(searchLower) ?? false;
+      const authorUsernameMatch = author?.username?.toLowerCase().includes(searchLower) ?? false;
+
+      return titleMatch || bodyMatch || authorNameMatch || authorUsernameMatch;
+    });
+  }, [posts, selectedColorId, search]);
+
+  const hasActiveFilters = useMemo(
+    () => Boolean(search.trim()) || selectedColorId !== null,
+    [search, selectedColorId]
+  );
 
   return (
-    <PageLayout onOpenCreateModal={() => setIsModalOpen(true)}>
-      <PinboardHeader title="Mural Público" subtitle="Veja o que as pessoas andam colando por aí.">
-        <ColorFilter colors={colors} selectedColorId={selectedColorId} onSelectColor={setSelectedColorId} />
-        <SearchInput value={search} onChange={setSearch} placeholder="Pesquisar por post, @username..." />
+    <PageLayout onOpenCreateModal={handleOpenCreateModal}>
+      <PinboardHeader 
+        title="Mural Público" 
+        subtitle="Veja o que as pessoas andam colando por aí."
+      >
+        <ColorFilter 
+          colors={colors} 
+          selectedColorId={selectedColorId} 
+          onSelectColor={setSelectedColorId} 
+        />
+        <SearchInput 
+          value={search} 
+          onChange={setSearch} 
+          placeholder="Pesquisar por post, @username..." 
+        />
       </PinboardHeader>
 
       {error ? (
-        <div className="text-center py-20 text-red-500 font-medium">{error}</div>
+        <div role="alert" className="text-center py-20 text-red-500 font-medium bg-app-card/50 rounded-3xl border border-app-border my-6">
+          {error}
+        </div>
       ) : (
         <PostPinboard
           posts={filteredPosts}
@@ -70,10 +116,10 @@ export function Feed() {
 
       <PostModalsManager
         isCreateOpen={isModalOpen}
-        onCloseCreate={() => setIsModalOpen(false)}
-        onSuccessCreate={fetchPosts}
+        onCloseCreate={handleCloseCreateModal}
+        onSuccessCreate={handleSuccessCreate}
         selectedPost={selectedPost}
-        onCloseView={() => setSelectedPost(null)}
+        onCloseView={handleCloseViewModal}
         onLikePost={handleLike}
       />
     </PageLayout>

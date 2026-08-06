@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { CreatePostModal } from '@/components/posts/CreatePostModal';
 import { ViewPostModal } from '@/components/posts/ViewPostModal';
 import type { PostResponse } from '@/services/types';
@@ -11,7 +12,7 @@ interface PostModalsManagerProps {
   onLikePost: (postId: number) => Promise<PostResponse | null>;
 }
 
-export function PostModalsManager({
+export const PostModalsManager = memo(function PostModalsManager({
   isCreateOpen,
   onCloseCreate,
   onSuccessCreate,
@@ -22,11 +23,15 @@ export function PostModalsManager({
   return (
     <>
       {isCreateOpen && (
-        <CreatePostModal onClose={onCloseCreate} onSuccess={onSuccessCreate} />
+        <CreatePostModal 
+          onClose={onCloseCreate} 
+          onSuccess={onSuccessCreate} 
+        />
       )}
 
       {selectedPost && (
         <ViewPostModal
+          key={selectedPost.id}
           post={selectedPost}
           onClose={onCloseView}
           handleLike={onLikePost}
@@ -34,4 +39,4 @@ export function PostModalsManager({
       )}
     </>
   );
-}
+});

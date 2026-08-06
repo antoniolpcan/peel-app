@@ -1,8 +1,9 @@
+import { useState, memo } from 'react';
 import type { MediaFileBase } from '@/services/types';
 
 interface UserAvatarProps {
   name?: string;
-  avatar?: MediaFileBase | null;
+  avatar?: MediaFileBase | string | null;
   sizeClass?: string;
   textSizeClass?: string;
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
@@ -16,22 +17,27 @@ const sizeMap = {
   xl: { box: 'w-24 h-24', text: 'text-3xl' },
 };
 
-export function UserAvatar({
+export const UserAvatar = memo(function UserAvatar({
   name = '?',
   avatar,
   sizeClass,
   textSizeClass,
   size = 'md',
 }: UserAvatarProps) {
-  const initial = name.charAt(0).toUpperCase();
-  const finalSizeClass = sizeClass || sizeMap[size].box;
-  const finalTextSizeClass = textSizeClass || sizeMap[size].text;
+  const [hasError, setHasError] = useState(false);
 
-  if (avatar?.url) {
+  const avatarUrl = typeof avatar === 'string' ? avatar : avatar?.url;
+
+  const initial = (name.trim().charAt(0) || '?').toUpperCase();
+  const finalSizeClass = sizeClass || sizeMap[size]?.box || sizeMap.md.box;
+  const finalTextSizeClass = textSizeClass || sizeMap[size]?.text || sizeMap.md.text;
+
+  if (avatarUrl && !hasError) {
     return (
       <img
-        src={avatar.url}
+        src={avatarUrl}
         alt={name}
+        onError={() => setHasError(true)}
         className={`${finalSizeClass} rounded-full object-cover border border-black/10 shadow-xs shrink-0 transition-all`}
       />
     );
@@ -39,10 +45,9 @@ export function UserAvatar({
 
   return (
     <div
-      className={`${finalSizeClass} ${finalTextSizeClass} bg-app-accent text-app-accent-text rounded-full flex items-center justify-center 
-        font-bold shadow-xs shrink-0 select-none transition-colors`}
+      className={`${finalSizeClass} ${finalTextSizeClass} bg-app-accent text-app-accent-text rounded-full flex items-center justify-center font-bold shadow-xs shrink-0 select-none transition-colors`}
     >
       {initial}
     </div>
   );
-}
+});

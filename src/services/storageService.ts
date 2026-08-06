@@ -1,4 +1,4 @@
-import { BASE_URL, handleResponse } from './apiClient';
+import { BASE_URL, apiFetch } from './apiClient';
 import type { UploadResponse } from './types';
 
 export const storageService = {
@@ -10,11 +10,10 @@ export const storageService = {
     const headers: HeadersInit = {};
     if (token) headers['Authorization'] = `Bearer ${token}`;
 
-    const response = await fetch(`${BASE_URL}/storage/upload`, {
+    return apiFetch<UploadResponse>(`${BASE_URL}/storage/upload`, {
       method: 'POST',
       headers,
       body: formData,
     });
-    return handleResponse<UploadResponse>(response);
   },
 };

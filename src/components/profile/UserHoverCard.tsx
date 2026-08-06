@@ -1,4 +1,8 @@
-import { Link } from 'react-router-dom';
+import React, { useState, useCallback, memo } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { MessageSquare, Loader2 } from 'lucide-react';
+import { useChat } from '@/hooks/useChat';
+
 import { UserAvatar } from './UserAvatar';
 import { FollowButton } from '@/components/ui/FollowButton';
 import type { BasicUserResponse, FollowStatsResponse } from '@/services/types';
@@ -11,10 +15,10 @@ interface UserHoverCardProps {
   isAuthenticated: boolean;
   isFollowing: boolean;
   isFollowLoading: boolean;
-  onToggleFollow: (e: React.MouseEvent) => void;
+  onToggleFollow: (userId: number) => void;
 }
 
-export function UserHoverCard({
+export const UserHoverCard = memo(function UserHoverCard({
   userId,
   user,
   stats,
@@ -24,32 +28,78 @@ export function UserHoverCard({
   isFollowLoading,
   onToggleFollow,
 }: UserHoverCardProps) {
+  const navigate = useNavigate();
+  const { startDirectChat } = useChat();
+  const [isStartingChat, setIsStartingChat] = useState(false);
+
+  const handleStartChat = useCallback(async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    let isMounted = true;
+    try {
+      setIsStartingChat(true);
+      const chat = await startDirectChat(userId);
+      navigate('/chat', { state: { selectedChatId: chat.id } });
+    } catch (err) {
+    } finally {
+      if (isMounted) {
+        setIsStartingChat(false);
+      }
+    }
+    return () => { isMounted = false; };
+  }, [navigate, startDirectChat, userId]);
+
+  const handleFollowClick = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    onToggleFollow(userId);
+  }, [onToggleFollow, userId]);
+
+  const isStatsLoading = stats === undefined;
+
   return (
     <div
-      className="w-64 bg-app-card rounded-2xl p-4 shadow-2xl border 
-      border-app-border animate-fadeIn pointer-events-auto transition-colors"
-      style={{ filter: 'drop-shadow(0 10px 25px rgba(0, 0, 0, 0.3))' }}
+      className="w-68 bg-app-card rounded-2xl p-4 shadow-2xl border 
+        border-app-border animate-in fade-in zoom-in-95 duration-150 pointer-events-auto transition-colors"
     >
       <div className="flex justify-between items-start mb-3">
-        <Link to={`/perfil/${userId}`}>
+        <Link to={`/perfil/${userId}`} className="hover:opacity-80 transition-opacity">
           <UserAvatar name={user.name} avatar={user.avatar} size="md" />
         </Link>
 
         {!isOwnProfile && isAuthenticated && (
-          <FollowButton
-            isFollowing={isFollowing}
-            isLoading={isFollowLoading}
-            onClick={onToggleFollow}
-            size="sm"
-          />
+          <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              onClick={handleStartChat}
+              disabled={isStartingChat}
+              title="Enviar Mensagem"
+              className="p-1.5 rounded-xl border border-app-border bg-app-bg text-app-text hover:bg-app-card transition-all cursor-pointer disabled:opacity-50 active:scale-95"
+            >
+              {isStartingChat ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin text-app-accent" />
+              ) : (
+                <MessageSquare className="w-3.5 h-3.5 text-app-accent" />
+              )}
+            </button>
+
+            <FollowButton
+              isFollowing={isFollowing}
+              isLoading={isFollowLoading}
+              onClick={handleFollowClick}
+              size="sm"
+            />
+          </div>
         )}
       </div>
 
-      <Link to={`/perfil/${userId}`} className="block group/link">
+      <Link to={`/perfil/${userId}`} className="block group/link mb-2">
         <h4 className="font-bold text-sm text-app-text leading-tight group-hover/link:underline transition-colors">
           {user.name}
         </h4>
-        <p className="text-xs text-app-muted mb-2">@{user.username}</p>
+        {user.username && (
+          <p className="text-xs text-app-muted">@{user.username}</p>
+        )}
       </Link>
 
       {user.bio && (
@@ -58,16 +108,25 @@ export function UserHoverCard({
         </p>
       )}
 
-      <div className="flex gap-4 pt-2 border-t border-app-border text-xs transition-colors">
-        <div>
-          <span className="font-bold text-app-text">{stats?.followers_count ?? 0}</span>{' '}
-          <span className="text-app-muted">Seguidores</span>
-        </div>
-        <div>
-          <span className="font-bold text-app-text">{stats?.following_count ?? 0}</span>{' '}
-          <span className="text-app-muted">Seguindo</span>
-        </div>
+      <div className="flex gap-4 pt-2 border-t border-app-border text-xs transition-colors min-h-7 items-center">
+        {isStatsLoading ? (
+          <div className="flex gap-4 w-full animate-pulse">
+            <div className="h-3 w-20 bg-app-border rounded" />
+            <div className="h-3 w-20 bg-app-border rounded" />
+          </div>
+        ) : (
+          <>
+            <div>
+              <span className="font-bold text-app-text">{stats?.followers_count ?? 0}</span>{' '}
+              <span className="text-app-muted">Seguidores</span>
+            </div>
+            <div>
+              <span className="font-bold text-app-text">{stats?.following_count ?? 0}</span>{' '}
+              <span className="text-app-muted">Seguindo</span>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
-}
+});

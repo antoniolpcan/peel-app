@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Link } from 'react-router-dom';
 
 interface AuthLayoutProps {
@@ -10,7 +10,7 @@ interface AuthLayoutProps {
   footerLinkTo: string;
 }
 
-export function AuthLayout({
+export const AuthLayout = memo(function AuthLayout({
   title,
   subtitle,
   children,
@@ -39,9 +39,11 @@ export function AuthLayout({
             </p>
           )}
         </div>
+
         <div className="space-y-4">
           {children}
         </div>
+
         <div className="mt-8 pt-6 border-t border-app-border text-center text-sm text-app-muted">
           <span>{footerText} </span>
           <Link
@@ -54,4 +56,4 @@ export function AuthLayout({
       </div>
     </div>
   );
-}
+});

@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import type { ColorResponse } from '@/services/types';
 
 interface ColorFilterProps {
@@ -6,16 +7,24 @@ interface ColorFilterProps {
   onSelectColor: (colorId: number | null) => void;
 }
 
-export function ColorFilter({ colors, selectedColorId, onSelectColor }: ColorFilterProps) {
+export const ColorFilter = memo(function ColorFilter({ 
+  colors = [], 
+  selectedColorId, 
+  onSelectColor 
+}: ColorFilterProps) {
   if (colors.length === 0) return null;
 
   return (
-    <div className="flex items-center gap-2 bg-app-card px-3 py-2.5 rounded-2xl 
-        border border-app-border shadow-xs self-start sm:self-auto justify-center transition-colors">
+    <div 
+      className="flex items-center gap-2 bg-app-card px-3 py-2.5 rounded-2xl border border-app-border shadow-xs self-start sm:self-auto justify-center transition-colors max-w-full overflow-x-auto no-scrollbar"
+      role="group"
+      aria-label="Filtro de cores"
+    >
       <button
         type="button"
         onClick={() => onSelectColor(null)}
-        className={`text-xs font-semibold px-2.5 py-1 rounded-xl transition-all cursor-pointer ${
+        aria-pressed={selectedColorId === null}
+        className={`text-xs font-semibold px-2.5 py-1 rounded-xl transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/50 ${
           selectedColorId === null
             ? 'bg-app-accent text-app-accent-text shadow-xs'
             : 'text-app-muted hover:text-app-text'
@@ -24,25 +33,29 @@ export function ColorFilter({ colors, selectedColorId, onSelectColor }: ColorFil
         Todos
       </button>
 
-      <div className="h-4 w-px bg-app-border mx-1 transition-colors" />
+      <div className="h-4 w-px bg-app-border mx-1 shrink-0 transition-colors" />
 
-      {colors.map((color) => {
-        const isSelected = selectedColorId === color.id;
-        return (
-          <button
-            key={color.id}
-            type="button"
-            onClick={() => onSelectColor(isSelected ? null : color.id)}
-            className={`w-6 h-6 rounded-full cursor-pointer transition-all duration-200 border-2 border-slate-900/30 ${
-              isSelected
-                ? 'scale-125 border-app-text ring-2 bg-app-accent ring-offset-1 shadow-xs'
-                : 'hover:scale-110 opacity-80 hover:opacity-100'
-            }`}
-            style={{ backgroundColor: color.hex_code }}
-            title={`Filtrar por ${color.name}`}
-          />
-        );
-      })}
+      <div className="flex items-center gap-2 shrink-0">
+        {colors.map((color) => {
+          const isSelected = selectedColorId === color.id;
+          return (
+            <button
+              key={color.id}
+              type="button"
+              onClick={() => onSelectColor(isSelected ? null : color.id)}
+              aria-pressed={isSelected}
+              aria-label={`Filtrar por cor ${color.name}`}
+              className={`w-6 h-6 rounded-full cursor-pointer transition-all duration-200 border-2 border-black/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent ${
+                isSelected
+                  ? 'scale-125 border-app-text ring-2 ring-app-accent ring-offset-1 shadow-xs z-10'
+                  : 'hover:scale-110 active:scale-95 opacity-80 hover:opacity-100'
+              }`}
+              style={{ backgroundColor: color.hex_code }}
+              title={`Filtrar por ${color.name}`}
+            />
+          );
+        })}
+      </div>
     </div>
   );
-}
+});

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, memo } from 'react';
 import { X } from 'lucide-react';
 
 interface ModalLayoutProps {
@@ -7,10 +7,34 @@ interface ModalLayoutProps {
   maxWidthClass?: string;
 }
 
-export function ModalLayout({ children, onClose, maxWidthClass = 'max-w-xl' }: ModalLayoutProps) {
+export const ModalLayout = memo(function ModalLayout({
+  children,
+  onClose,
+  maxWidthClass = 'max-w-xl',
+}: ModalLayoutProps) {
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [onClose]);
+
   return (
     <div
-      className="fixed inset-0 bg-slate-950/70 flex items-center justify-center p-4 z-50 backdrop-blur-md"
+      role="dialog"
+      aria-modal="true"
+      className="fixed inset-0 bg-slate-950/70 flex items-center justify-center p-4 z-50 backdrop-blur-md animate-in fade-in duration-200"
       onClick={onClose}
     >
       <div
@@ -31,4 +55,4 @@ export function ModalLayout({ children, onClose, maxWidthClass = 'max-w-xl' }: M
       </div>
     </div>
   );
-}
+});
