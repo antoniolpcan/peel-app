@@ -25,7 +25,7 @@ export const CommentItem = memo(function CommentItem({ comment, onNavigate }: Co
           </span>
         )}
       </div>
-      <p className="text-sm text-app-text whitespace-pre-wrap leading-relaxed break-words px-0.5 transition-colors">
+      <p className="text-sm text-app-text whitespace-pre-wrap leading-relaxed wrap-break-word px-0.5 transition-colors">
         {formattedContent}
       </p>
     </div>
