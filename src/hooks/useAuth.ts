@@ -26,5 +26,42 @@ export function useAuthApi() {
     }
   }, []);
 
-  return { executeLogin, loading, error, clearError };
+  const executeForgotPassword = useCallback(async (email: string): Promise<boolean> => {
+    try {
+      setLoading(true);
+      setError(null);
+      await authService.forgotPassword(email);
+      return true;
+    } catch (err: unknown) {
+      const errorMessage = parseApiError(err);
+      setError(errorMessage);
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const executeResetPassword = useCallback(async (token: string, newPassword: string): Promise<boolean> => {
+    try {
+      setLoading(true);
+      setError(null);
+      await authService.resetPassword(token, newPassword);
+      return true;
+    } catch (err: unknown) {
+      const errorMessage = parseApiError(err);
+      setError(errorMessage);
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  return {
+    executeLogin,
+    executeForgotPassword,
+    executeResetPassword,
+    loading,
+    error,
+    clearError,
+  };
 }

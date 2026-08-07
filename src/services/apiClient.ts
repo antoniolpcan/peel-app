@@ -1,9 +1,7 @@
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api/v1';
 
 export function getHeaders(isAuthenticated = false): HeadersInit {
-  const headers: HeadersInit = {
-    'Content-Type': 'application/json',
-  };
+  const headers: Record<string, string> = {};
 
   if (isAuthenticated) {
     const token = localStorage.getItem('@peel:token');
@@ -35,8 +33,7 @@ export async function handleResponse<T>(response: Response): Promise<T> {
             return 'Dado inválido';
           })
           .join(' | ');
-      } 
-      else if (typeof errorData.detail === 'string') {
+      } else if (typeof errorData.detail === 'string') {
         message = errorData.detail;
       }
     }
@@ -51,18 +48,54 @@ export async function handleResponse<T>(response: Response): Promise<T> {
   return response.json();
 }
 
+export interface ApiFetchOptions extends Omit<RequestInit, 'body'> {
+  body?: Record<string, any> | BodyInit | null;
+  auth?: boolean;
+}
+
 export async function apiFetch<T>(
   input: RequestInfo | URL,
-  init?: RequestInit
+  init: ApiFetchOptions = {}
 ): Promise<T> {
+  const { auth = false, headers: customHeaders, body, ...customConfig } = init;
+
+  const isPlainObject =
+    body &&
+    typeof body === 'object' &&
+    !(body instanceof FormData) &&
+    !(body instanceof URLSearchParams) &&
+    !(body instanceof Blob) &&
+    !(body instanceof ArrayBuffer);
+
+  const headers = new Headers(getHeaders(auth));
+
+  if (customHeaders) {
+    new Headers(customHeaders).forEach((value, key) => {
+      headers.set(key, value);
+    });
+  }
+
+  if (isPlainObject && !headers.has('Content-Type')) {
+    headers.set('Content-Type', 'application/json');
+  }
+
+  let formattedBody: BodyInit | null = body as BodyInit | null;
+  if (isPlainObject) {
+    formattedBody = JSON.stringify(body);
+  }
+
+  const config: RequestInit = {
+    ...customConfig,
+    headers,
+    body: formattedBody,
+  };
+
   try {
-    const response = await fetch(input, init);
+    const response = await fetch(input, config);
     return await handleResponse<T>(response);
   } catch (error: any) {
     if (error.message === 'Failed to fetch' || error.name === 'TypeError') {
-      throw new Error(
-        'Não foi possível se conectar ao servidor.'
-      );
+      throw new Error('Não foi possível se conectar ao servidor.');
     }
     throw error;
   }

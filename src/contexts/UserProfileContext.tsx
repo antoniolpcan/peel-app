@@ -1,4 +1,4 @@
-import { createContext, useContext, type ReactNode } from 'react';
+import { createContext, type ReactNode } from 'react';
 import { useAuth } from './AuthContext';
 import { useUser } from '@/hooks/useUsers';
 import type { BasicUserResponse } from '@/services/types';
@@ -21,5 +21,3 @@ export function UserProfileProvider({ children }: { children: ReactNode }) {
     </UserProfileContext.Provider>
   );
 }
-
-export const useUserProfile = () => useContext(UserProfileContext);

@@ -7,6 +7,7 @@ import { PrivateRoute } from './PrivateRoute';
 import { NotificationsPage } from '@/pages/Notifications';
 import { ChatPage } from '@/pages/Chat';
 import { UserSettingsPage } from '@/pages/UserSettings';
+import { ResetPasswordPage } from '@/pages/ResetPassword';
 
 export function AppRoutes() {
   return (
@@ -20,6 +21,7 @@ export function AppRoutes() {
       <Route path="/chat" element={<ChatPage />} />
       <Route path="/chat/:chatId" element={<ChatPage />} />
       <Route path="/settings" element={<UserSettingsPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
     </Routes>
   );
 }

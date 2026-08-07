@@ -1,5 +1,4 @@
 import React, { useState, useCallback } from 'react';
-import { Link } from 'react-router-dom';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAuthApi } from '@/hooks/useAuth';
@@ -8,11 +7,13 @@ import { AuthLayout } from '@/components/auth/AuthLayout';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { ErrorMessage } from '@/components/ui/ErrorMessage';
+import { ForgotPasswordModal } from '@/components/auth/ForgotPasswordModal';
 
 export function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [isForgotModalOpen, setIsForgotModalOpen] = useState(false); 
 
   const { login: saveSession } = useAuth();
   const { executeLogin, loading, error } = useAuthApi();
@@ -73,12 +74,14 @@ export function Login() {
             <label htmlFor="login-password" className="text-xs font-semibold text-app-muted">
               Senha
             </label>
-            <Link
-              to="/forgot-password"
-              className="text-[11px] font-medium text-app-accent hover:underline transition-all"
+            
+            <button
+              type="button"
+              onClick={() => setIsForgotModalOpen(true)}
+              className="text-[11px] font-medium text-app-accent hover:underline transition-all cursor-pointer"
             >
               Esqueceu a senha?
-            </Link>
+            </button>
           </div>
 
           <div className="relative">
@@ -121,6 +124,12 @@ export function Login() {
           Entrar no Peel
         </Button>
       </form>
+
+      <ForgotPasswordModal 
+        isOpen={isForgotModalOpen}
+        onClose={() => setIsForgotModalOpen(false)}
+        onBackToLogin={() => setIsForgotModalOpen(false)}
+      />
     </AuthLayout>
   );
 }
