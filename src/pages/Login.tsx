@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
-import { Eye, EyeOff } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAuthApi } from '@/hooks/useAuth';
 import { useToast } from '@/contexts/ToastContext';
@@ -49,25 +50,39 @@ export function Login() {
           <label htmlFor="login-email" className="text-xs font-semibold text-app-muted ml-1">
             E-mail
           </label>
-          <Input
-            id="login-email"
-            name="email"
-            type="email"
-            autoComplete="email"
-            placeholder="seu@email.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            disabled={loading}
-            required
-            autoFocus
-          />
+          <div className="relative">
+            <Mail className="w-4 h-4 text-app-muted absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <Input
+              id="login-email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              placeholder="seu@email.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              disabled={loading}
+              className="pl-9"
+              required
+              autoFocus
+            />
+          </div>
         </div>
 
         <div className="space-y-1">
-          <label htmlFor="login-password" className="text-xs font-semibold text-app-muted ml-1">
-            Senha
-          </label>
+          <div className="flex items-center justify-between px-1">
+            <label htmlFor="login-password" className="text-xs font-semibold text-app-muted">
+              Senha
+            </label>
+            <Link
+              to="/forgot-password"
+              className="text-[11px] font-medium text-app-accent hover:underline transition-all"
+            >
+              Esqueceu a senha?
+            </Link>
+          </div>
+
           <div className="relative">
+            <Lock className="w-4 h-4 text-app-muted absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
             <Input
               id="login-password"
               name="password"
@@ -77,7 +92,7 @@ export function Login() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               disabled={loading}
-              className="pr-10"
+              className="pl-9 pr-10"
               required
             />
             <button

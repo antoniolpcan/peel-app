@@ -8,6 +8,7 @@ import { usePosts } from '@/hooks/usePosts';
 import { useColors } from '@/hooks/useColors';
 import { useProfileEdit } from '@/hooks/useProfileEdit';
 import { useProfileFollow } from '@/hooks/useProfileFollow';
+import { useFollowing } from '@/hooks';
 
 import { PageLayout } from '@/components/layout/PageLayout';
 import { PostPinboard } from '@/components/posts/PostPinboard';
@@ -30,6 +31,8 @@ export function Profile() {
 
   const { user, loading: isFetching, refetch: refetchUser } = useUser(profileUserId);
   const { colors } = useColors();
+
+  const { following: myFollowing, refetch: refetchMyFollowing } = useFollowing(loggedUserId || 0);
 
   const { 
     posts, 
@@ -56,6 +59,9 @@ export function Profile() {
       fetchPosts();
       follow.refetchStats();
       follow.refetchFollowers();
+      if (refetchMyFollowing) {
+        refetchMyFollowing();
+      }
     }
   }, [profileUserId]);
 
@@ -83,6 +89,18 @@ export function Profile() {
   const handleCloseCropModal = useCallback(() => {
     edit.setTempImageSrc(null);
   }, [edit]);
+
+  const handleModalFollowToggle = useCallback((toggledUserId: number) => {
+    follow.refetchStats();
+    
+    if (refetchMyFollowing) {
+      refetchMyFollowing();
+    }
+    
+    if (toggledUserId === profileUserId) {
+      follow.refetchFollowers();
+    }
+  }, [follow, refetchMyFollowing, profileUserId]);
 
   const filteredPosts = useMemo(() => {
     if (selectedColorId === null) return posts;
@@ -195,8 +213,9 @@ export function Profile() {
         type={follow.followModalType}
         loading={follow.followModalType === 'followers' ? follow.loadingFollowers : follow.loadingFollowing}
         users={currentFollowUsers}
+        myFollowingList={myFollowing}
         onClose={handleCloseFollowModal}
-        onToggleFollow={follow.handleToggleFollow}
+        onToggleFollow={handleModalFollowToggle}
         isOwnProfile={isOwnProfile}
       />
 

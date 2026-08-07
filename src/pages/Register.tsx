@@ -1,6 +1,6 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, User, AtSign, Mail, Lock } from 'lucide-react';
 import { useUserActions } from '@/hooks/useUsers';
 import { useToast } from '@/contexts/ToastContext';
 import { AuthLayout } from '@/components/auth/AuthLayout';
@@ -28,6 +28,20 @@ export function Register() {
 
     setFormData((prev) => ({ ...prev, [name]: sanitizedValue }));
   }, []);
+
+  const passwordStrength = useMemo(() => {
+    const pwd = formData.password;
+    if (!pwd) return { score: 0, label: '', color: '' };
+
+    let score = 0;
+    if (pwd.length >= 6) score++;
+    if (pwd.length >= 8 && /[0-9]/.test(pwd)) score++;
+    if (/[A-Z]/.test(pwd) && /[^A-Za-z0-9]/.test(pwd)) score++;
+
+    if (score <= 1) return { score: 1, label: 'Fraca', color: 'bg-rose-500', text: 'text-rose-500' };
+    if (score === 2) return { score: 2, label: 'Média', color: 'bg-amber-500', text: 'text-amber-500' };
+    return { score: 3, label: 'Forte', color: 'bg-emerald-500', text: 'text-emerald-500' };
+  }, [formData.password]);
 
   const handleRegister = useCallback(
     async (e: React.FormEvent) => {
@@ -67,59 +81,79 @@ export function Register() {
           <label htmlFor="register-name" className="text-xs font-semibold text-app-muted ml-1">
             Seu Nome
           </label>
-          <Input
-            id="register-name"
-            name="name"
-            type="text"
-            autoComplete="name"
-            placeholder="Como quer ser chamado?"
-            value={formData.name}
-            onChange={handleChange}
-            disabled={loading}
-            required
-            autoFocus
-          />
+          <div className="relative">
+            <User className="w-4 h-4 text-app-muted absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <Input
+              id="register-name"
+              name="name"
+              type="text"
+              autoComplete="name"
+              placeholder="Como quer ser chamado?"
+              value={formData.name}
+              onChange={handleChange}
+              disabled={loading}
+              className="pl-9"
+              required
+              autoFocus
+            />
+          </div>
         </div>
 
         <div className="space-y-1">
           <label htmlFor="register-username" className="text-xs font-semibold text-app-muted ml-1">
             Nome de Usuário
           </label>
-          <Input
-            id="register-username"
-            name="username"
-            type="text"
-            autoComplete="username"
-            placeholder="@seu_username"
-            value={formData.username}
-            onChange={handleChange}
-            disabled={loading}
-            required
-          />
+          <div className="relative">
+            <AtSign className="w-4 h-4 text-app-muted absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <Input
+              id="register-username"
+              name="username"
+              type="text"
+              autoComplete="username"
+              placeholder="seu_username"
+              value={formData.username}
+              onChange={handleChange}
+              disabled={loading}
+              className="pl-9"
+            />
+          </div>
         </div>
 
         <div className="space-y-1">
           <label htmlFor="register-email" className="text-xs font-semibold text-app-muted ml-1">
             E-mail
           </label>
-          <Input
-            id="register-email"
-            name="email"
-            type="email"
-            autoComplete="email"
-            placeholder="seu@email.com"
-            value={formData.email}
-            onChange={handleChange}
-            disabled={loading}
-            required
-          />
+          <div className="relative">
+            <Mail className="w-4 h-4 text-app-muted absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <Input
+              id="register-email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              placeholder="seu@email.com"
+              value={formData.email}
+              onChange={handleChange}
+              disabled={loading}
+              className="pl-9"
+              required
+            />
+          </div>
         </div>
 
         <div className="space-y-1">
-          <label htmlFor="register-password" className="text-xs font-semibold text-app-muted ml-1">
-            Senha
-          </label>
+          <div className="flex items-center justify-between px-1">
+            <label htmlFor="register-password" className="text-xs font-semibold text-app-muted">
+              Senha
+            </label>
+            {passwordStrength.score > 0 && (
+              <span className={`text-[10px] font-bold ${passwordStrength.text}`}>
+                {passwordStrength.label}
+              </span>
+            )}
+          </div>
+
           <div className="relative">
+            <Lock className="w-4 h-4 text-app-muted absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
             <Input
               id="register-password"
               name="password"
@@ -129,7 +163,7 @@ export function Register() {
               value={formData.password}
               onChange={handleChange}
               disabled={loading}
-              className="pr-10"
+              className="pl-9 pr-10"
               required
             />
             <button
@@ -147,13 +181,25 @@ export function Register() {
               )}
             </button>
           </div>
+          {formData.password.length > 0 && (
+            <div className="flex gap-1 pt-1 px-1">
+              {[1, 2, 3].map((step) => (
+                <div
+                  key={step}
+                  className={`h-1 flex-1 rounded-full transition-all duration-300 ${
+                    step <= passwordStrength.score ? passwordStrength.color : 'bg-app-border/40'
+                  }`}
+                />
+              ))}
+            </div>
+          )}
         </div>
 
         <Button 
           type="submit" 
           isLoading={loading} 
           loadingText="Criando conta..."
-          className="mt-3"
+          className="mt-2"
         >
           Criar minha conta
         </Button>

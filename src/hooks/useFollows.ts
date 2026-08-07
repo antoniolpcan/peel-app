@@ -13,47 +13,29 @@ export function useFollowers(userId: number) {
       return;
     }
 
-    let isMounted = true;
     try {
       setLoading(true);
       setError(null);
       const data = await followService.getFollowers(userId);
-      if (isMounted) setFollowers(data);
+      setFollowers(data);
     } catch (err: any) {
-      if (isMounted) setError(err.message || 'Erro ao buscar seguidores');
+      setError(err.message || 'Erro ao buscar seguidores');
     } finally {
-      if (isMounted) setLoading(false);
+      setLoading(false);
     }
-
-    return () => { isMounted = false; };
   }, [userId]);
 
   useEffect(() => {
-    let isMounted = true;
+    fetchFollowers();
+  }, [fetchFollowers]);
 
-    async function loadData() {
-      if (!userId) {
-        setLoading(false);
-        return;
-      }
-      try {
-        setLoading(true);
-        setError(null);
-        const data = await followService.getFollowers(userId);
-        if (isMounted) setFollowers(data);
-      } catch (err: any) {
-        if (isMounted) setError(err.message || 'Erro ao buscar seguidores');
-      } finally {
-        if (isMounted) setLoading(false);
-      }
-    }
-
-    loadData();
-
-    return () => { isMounted = false; };
-  }, [userId]);
-
-  return { followers, loading, error, refetch: fetchFollowers };
+  return { 
+    followers, 
+    loading, 
+    error, 
+    refetch: fetchFollowers,
+    refetchFollowers: fetchFollowers
+  };
 }
 
 export function useFollowStats(userId: number) {
@@ -67,47 +49,29 @@ export function useFollowStats(userId: number) {
       return;
     }
 
-    let isMounted = true;
     try {
       setLoading(true);
       setError(null);
       const data = await followService.getFollowStats(userId);
-      if (isMounted) setStats(data);
+      setStats(data);
     } catch (err: any) {
-      if (isMounted) setError(err.message || 'Erro ao carregar estatísticas');
+      setError(err.message || 'Erro ao carregar estatísticas');
     } finally {
-      if (isMounted) setLoading(false);
+      setLoading(false);
     }
-
-    return () => { isMounted = false; };
   }, [userId]);
 
   useEffect(() => {
-    let isMounted = true;
+    fetchStats();
+  }, [fetchStats]);
 
-    async function loadData() {
-      if (!userId) {
-        setLoading(false);
-        return;
-      }
-      try {
-        setLoading(true);
-        setError(null);
-        const data = await followService.getFollowStats(userId);
-        if (isMounted) setStats(data);
-      } catch (err: any) {
-        if (isMounted) setError(err.message || 'Erro ao carregar estatísticas');
-      } finally {
-        if (isMounted) setLoading(false);
-      }
-    }
-
-    loadData();
-
-    return () => { isMounted = false; };
-  }, [userId]);
-
-  return { stats, loading, error, refetch: fetchStats };
+  return { 
+    stats, 
+    loading, 
+    error, 
+    refetch: fetchStats,
+    refetchStats: fetchStats
+  };
 }
 
 export function useFollowing(userId: number) {
@@ -121,47 +85,29 @@ export function useFollowing(userId: number) {
       return;
     }
 
-    let isMounted = true;
     try {
       setLoading(true);
       setError(null);
       const data = await followService.getFollowing(userId);
-      if (isMounted) setFollowing(data);
+      setFollowing(data);
     } catch (err: any) {
-      if (isMounted) setError(err.message || 'Erro ao buscar usuários seguidos');
+      setError(err.message || 'Erro ao buscar usuários seguidos');
     } finally {
-      if (isMounted) setLoading(false);
+      setLoading(false);
     }
-
-    return () => { isMounted = false; };
   }, [userId]);
 
   useEffect(() => {
-    let isMounted = true;
+    fetchFollowing();
+  }, [fetchFollowing]);
 
-    async function loadData() {
-      if (!userId) {
-        setLoading(false);
-        return;
-      }
-      try {
-        setLoading(true);
-        setError(null);
-        const data = await followService.getFollowing(userId);
-        if (isMounted) setFollowing(data);
-      } catch (err: any) {
-        if (isMounted) setError(err.message || 'Erro ao buscar usuários seguidos');
-      } finally {
-        if (isMounted) setLoading(false);
-      }
-    }
-
-    loadData();
-
-    return () => { isMounted = false; };
-  }, [userId]);
-
-  return { following, loading, error, refetch: fetchFollowing };
+  return { 
+    following, 
+    loading, 
+    error, 
+    refetch: fetchFollowing,
+    refetchFollowing: fetchFollowing
+  };
 }
 
 export function useFollowActions() {

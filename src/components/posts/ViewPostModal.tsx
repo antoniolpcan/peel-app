@@ -77,7 +77,12 @@ export const ViewPostModal = memo(function ViewPostModal({
             <MessageSquare className="w-4 h-4 text-app-accent" />
             <span>Comentários {!isLoadingComments && `(${comments.length})`}</span>
           </h3>
-          <CommentList comments={comments} isLoading={isLoadingComments} onNavigate={onClose} />
+          <CommentList 
+            comments={comments} 
+            isLoading={isLoadingComments} 
+            onNavigate={onClose} 
+            postColorHex={post.color?.hex_code}
+          />
         </div>
 
         <div className="pt-4 border-t border-app-border shrink-0 bg-app-card transition-colors sticky -bottom-6 -mx-6 px-6 pb-6 z-30">

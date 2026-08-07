@@ -1,11 +1,18 @@
-import { memo } from 'react';
+import { memo, useState, useEffect } from 'react';
 import { Users } from 'lucide-react';
 import { ModalLayout } from '@/components/layout/ModalLayout';
 import { FollowListItem } from './FollowListItem';
-import type { BasicUserResponse } from '@/services/types';
+import type { BasicUserResponse, MediaFileBase } from '@/services/types';
 
 interface UserListItem {
   id: number;
+  name?: string;
+  username?: string;
+  avatar?: MediaFileBase | string | null;
+  is_following?: boolean;
+  isFollowing?: boolean;
+  follower_id?: number;
+  following_id?: number;
   follower?: BasicUserResponse & { is_following?: boolean };
   following?: BasicUserResponse & { is_following?: boolean };
   user?: BasicUserResponse & { is_following?: boolean };
@@ -15,23 +22,58 @@ interface FollowListModalProps {
   type: 'followers' | 'following' | null;
   loading: boolean;
   users: UserListItem[];
+  myFollowingList?: any[];
   onClose: () => void;
   onToggleFollow?: (userId: number) => void;
   isOwnProfile?: boolean;
 }
 
+const isUserInList = (list: any[], targetId: number) => {
+  if (!Array.isArray(list) || !targetId) return false;
+  return list.some((item) => {
+    const uId =
+      item?.following_id ||
+      item?.follower_id ||
+      item?.following?.id ||
+      item?.user?.id ||
+      item?.follower?.id ||
+      item?.id;
+    return Number(uId) === Number(targetId);
+  });
+};
+
 export const FollowListModal = memo(function FollowListModal({ 
   type, 
   loading, 
   users = [], 
+  myFollowingList = [],
   onClose,
   onToggleFollow,
   isOwnProfile = true
 }: FollowListModalProps) {
+
+  const [followedOverrides, setFollowedOverrides] = useState<Record<number, boolean>>({});
+
+  useEffect(() => {
+    setFollowedOverrides({});
+  }, [type]);
+
   if (!type) return null;
 
   const isFollowersType = type === 'followers';
   const title = isFollowersType ? 'Seguidores' : 'Seguindo';
+
+  const handleToggle = (userId: number, currentStatus: boolean) => {
+    const nextStatus = !currentStatus;
+    setFollowedOverrides((prev) => ({
+      ...prev,
+      [userId]: nextStatus,
+    }));
+
+    if (onToggleFollow) {
+      onToggleFollow(userId);
+    }
+  };
 
   return (
     <ModalLayout onClose={onClose} maxWidthClass="max-w-md">
@@ -70,28 +112,51 @@ export const FollowListModal = memo(function FollowListModal({
         ) : (
           <ul className="flex flex-col gap-1">
             {users.map((item, index) => {
-              const rawUser = isFollowersType 
+              const rawUser: any = (isFollowersType 
                 ? item.follower || item.user 
-                : item.following || item.user;
+                : item.following || item.user) || item;
 
-              if (!rawUser || !rawUser.id) return null;
+              const targetUserId = Number(
+                rawUser?.id || item.follower_id || item.following_id || item.id
+              );
 
-              const isFollowingCalculated = 
-                (!isFollowersType && isOwnProfile) ? true : Boolean(rawUser.is_following);
+              if (!targetUserId) return null;
+
+              const explicitIsFollowing =
+                item.is_following ??
+                item.isFollowing ??
+                rawUser.is_following ??
+                rawUser.isFollowing ??
+                rawUser.is_followed;
+
+              let isFollowingCalculated = false;
+
+              if (explicitIsFollowing !== undefined && explicitIsFollowing !== null) {
+                isFollowingCalculated = Boolean(explicitIsFollowing);
+              } else if (!isFollowersType && isOwnProfile) {
+                isFollowingCalculated = true;
+              } else if (myFollowingList.length > 0) {
+                isFollowingCalculated = isUserInList(myFollowingList, targetUserId);
+              }
+
+              const finalIsFollowing =
+                followedOverrides[targetUserId] !== undefined
+                  ? followedOverrides[targetUserId]
+                  : isFollowingCalculated;
 
               const listItemUser = {
-                id: rawUser.id,
+                id: targetUserId,
                 name: rawUser.name || 'Usuário',
-                username: rawUser.username,
-                avatar: rawUser.avatar,
-                is_following: isFollowingCalculated,
+                username: rawUser.username || '',
+                avatar: rawUser.avatar || null,
+                is_following: finalIsFollowing,
               };
 
               return (
                 <FollowListItem
-                  key={item.id || rawUser.id || `user-${index}`}
+                  key={`${type}-${targetUserId}-${index}`}
                   user={listItemUser}
-                  onToggleFollow={onToggleFollow}
+                  onToggleFollow={() => handleToggle(targetUserId, finalIsFollowing)}
                   onCloseModal={onClose}
                 />
               );

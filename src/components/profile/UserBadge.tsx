@@ -91,24 +91,23 @@ export const UserBadge = memo(function UserBadge({
   }
 
   return (
-    <div 
-      className="relative inline-block" 
-      onClick={(e) => e.stopPropagation()}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-    >
+    <div className="inline-block" onClick={(e) => e.stopPropagation()}>
       <div className="flex items-center gap-2.5 w-fit">
-        <div className="relative">
+        <div 
+          className="relative"
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+        >
           <Link 
             to={`/perfil/${userId}`}
             onClick={onNavigate}
-            className="block hover:opacity-80 transition-opacity cursor-pointer"
+            className="block hover:opacity-80 transition-opacity cursor-pointer shrink-0"
           >
             <UserAvatar name={user.name} avatar={user.avatar} size="md" />
           </Link>
 
           {isHovered && (
-            <div className="absolute top-full left-0 pt-2 z-50 animate-in fade-in zoom-in-95 duration-150">
+            <div className="absolute top-full left-0 pt-1 z-50 animate-in fade-in zoom-in-95 duration-150">
               <UserHoverCard
                 userId={userId}
                 user={user}
@@ -128,12 +127,11 @@ export const UserBadge = memo(function UserBadge({
           onClick={onNavigate}
           className="flex flex-col hover:opacity-80 transition-opacity cursor-pointer"
         >
-          <span className="text-xs font-bold text-slate-900 leading-tight 
-            hover:underline transition-colors">
+          <span className="text-xs font-bold text-slate-900 leading-tight hover:underline transition-colors">
             {user.name}
           </span>
           {user.username && (
-            <span className="text-[11px] text-slate-900 font-normal transition-colors">
+            <span className="text-[11px] text-slate-800/80 font-normal transition-colors">
               @{user.username}
             </span>
           )}

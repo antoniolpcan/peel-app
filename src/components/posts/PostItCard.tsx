@@ -12,6 +12,7 @@ interface PostItCardProps {
   onClick: () => void;
   onLike: (e: React.MouseEvent, id: number) => void;
   onDelete: (e: React.MouseEvent, id: number) => void;
+  showTape?: boolean;
 }
 
 export const PostItCard = memo(function PostItCard({
@@ -20,6 +21,7 @@ export const PostItCard = memo(function PostItCard({
   onClick,
   onLike,
   onDelete,
+  showTape = true,
 }: PostItCardProps) {
   const { loggedUserId } = useAuth();
   const [isDeleting, setIsDeleting] = useState(false);
@@ -61,6 +63,10 @@ export const PostItCard = memo(function PostItCard({
         filter: 'saturate(1.25) contrast(1.05)',
       }}
     >
+      {showTape && (
+        <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 w-12 h-4 bg-white/40 shadow-xs -rotate-1 backdrop-blur-xs rounded-xs pointer-events-none border border-white/20 z-10" />
+      )}
+
       <UserBadge userId={post.user_id} user={post.user} />
 
       <h2 className="text-xl font-bold mb-2 text-slate-900 leading-snug">
