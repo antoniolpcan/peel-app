@@ -4,7 +4,12 @@ import type { CommentResponse, GetPostsParams, PostBase, PostResponse, PostUpdat
 
 const LIMIT = 12;
 
-export function usePosts(params: GetPostsParams = {}) {
+export interface UsePostsParams extends GetPostsParams {
+  feedType?: 'public' | 'following';
+  followingOnly?: boolean;
+}
+
+export function usePosts(params: UsePostsParams = {}) {
   const [posts, setPosts] = useState<PostResponse[]>([]);
   const [selectedPost, setSelectedPost] = useState<PostResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -13,30 +18,44 @@ export function usePosts(params: GetPostsParams = {}) {
   const [hasMore, setHasMore] = useState(true);
 
   const skipRef = useRef(0);
+  const activeRequestRef = useRef(0);
   const paramsKey = JSON.stringify(params);
 
+  const fetchFromService = useCallback(async (queryParams: GetPostsParams): Promise<PostResponse[]> => {
+    const isFollowing = params.feedType === 'following' || params.followingOnly;
+
+    if (isFollowing && 'getFollowingPosts' in postService && typeof (postService as any).getFollowingPosts === 'function') {
+      return await (postService as any).getFollowingPosts(queryParams);
+    }
+
+    return await postService.getPosts(queryParams);
+  }, [paramsKey]);
+
   const fetchPosts = useCallback(async () => {
-    let isMounted = true;
+    const currentRequestId = ++activeRequestRef.current;
+
     try {
       setLoading(true);
       setError(null);
       skipRef.current = 0;
 
       const initialParams = { ...params, skip: 0, limit: LIMIT };
-      const data = await postService.getPosts(initialParams);
+      const data = await fetchFromService(initialParams);
 
-      if (isMounted) {
+      if (currentRequestId === activeRequestRef.current) {
         setPosts(data);
         setHasMore(data.length === LIMIT);
       }
     } catch (err: any) {
-      if (isMounted) setError(err.message || 'Erro ao carregar posts');
+      if (currentRequestId === activeRequestRef.current) {
+        setError(err.message || 'Erro ao carregar posts');
+      }
     } finally {
-      if (isMounted) setLoading(false);
+      if (currentRequestId === activeRequestRef.current) {
+        setLoading(false);
+      }
     }
-
-    return () => { isMounted = false; };
-  }, [paramsKey]);
+  }, [paramsKey, fetchFromService]);
 
   const fetchMorePosts = useCallback(async () => {
     if (loading || loadingMore || !hasMore) return;
@@ -46,7 +65,7 @@ export function usePosts(params: GetPostsParams = {}) {
       const nextSkip = skipRef.current + LIMIT;
       const nextParams = { ...params, skip: nextSkip, limit: LIMIT };
 
-      const newPosts = await postService.getPosts(nextParams);
+      const newPosts = await fetchFromService(nextParams);
 
       if (newPosts.length > 0) {
         setPosts((prev) => {
@@ -62,7 +81,7 @@ export function usePosts(params: GetPostsParams = {}) {
     } finally {
       setLoadingMore(false);
     }
-  }, [paramsKey, loading, loadingMore, hasMore]);
+  }, [paramsKey, loading, loadingMore, hasMore, fetchFromService]);
 
   const handleLike = useCallback(async (postId: number) => {
     let previousPosts: PostResponse[] = [];
@@ -207,34 +226,11 @@ export function useComments(postId: number) {
     } finally {
       if (isMounted) setLoading(false);
     }
-
-    return () => { isMounted = false; };
   }, [postId]);
 
   useEffect(() => {
-    let isMounted = true;
-
-    async function loadData() {
-      if (!postId) {
-        setLoading(false);
-        return;
-      }
-      try {
-        setLoading(true);
-        setError(null);
-        const data = await postService.getComments(postId);
-        if (isMounted) setComments(data);
-      } catch (err: any) {
-        if (isMounted) setError(err.message || 'Erro ao carregar comentários');
-      } finally {
-        if (isMounted) setLoading(false);
-      }
-    }
-
-    loadData();
-
-    return () => { isMounted = false; };
-  }, [postId]);
+    fetchComments();
+  }, [fetchComments]);
 
   const createComment = useCallback(async (content: string) => {
     if (!content.trim() || submitting) return null;
