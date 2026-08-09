@@ -15,7 +15,7 @@ interface AuthLayoutProps {
 const POSTIT_TYPES = {
   ideia: {
     label: 'Ideia',
-    icon: Lightbulb, // Lâmpada no lugar do Pin
+    icon: Lightbulb,
     cardBg: 'bg-yellow-200 dark:bg-yellow-300 text-slate-900',
     headerText: 'text-yellow-900',
     iconColor: 'text-yellow-800',
@@ -24,7 +24,7 @@ const POSTIT_TYPES = {
   },
   checklist: {
     label: 'Checklist',
-    icon: ListChecks, // Lista de checagem no lugar do Sparkles
+    icon: ListChecks,
     cardBg: 'bg-indigo-200 dark:bg-indigo-300 text-slate-900',
     headerText: 'text-indigo-900',
     iconColor: 'text-indigo-800',

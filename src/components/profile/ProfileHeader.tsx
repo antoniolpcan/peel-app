@@ -68,17 +68,20 @@ export const ProfileHeader = memo(function ProfileHeader({
   }, [navigate, startDirectChat, user.id]);
 
   return (
-    <div className="bg-app-card border border-app-border rounded-3xl p-6 sm:p-8 shadow-xs mb-8 flex flex-col sm:flex-row justify-between items-start gap-6 transition-colors">
+    <div className="bg-app-card border border-app-border rounded-3xl p-5 sm:p-8 shadow-xs mb-8 flex flex-col md:flex-row justify-between items-start gap-6 transition-colors overflow-hidden">
       
-      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 w-full sm:w-auto">
-        <UserAvatar name={user.name} avatar={user.avatar} size="xl" />
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 w-full md:w-auto min-w-0 flex-1">
+        <div className="shrink-0">
+          <UserAvatar name={user.name} avatar={user.avatar} size="xl" />
+        </div>
         
-        <div className="flex flex-col">
-          <h1 className="text-2xl sm:text-3xl font-bold text-app-text transition-colors leading-tight">
+        <div className="flex flex-col min-w-0 flex-1 w-full">
+          <h1 className="text-xl sm:text-3xl font-bold text-app-text transition-colors leading-tight wrap-break-word">
             {user.name}
           </h1>
+          
           {user.username && (
-            <p className="text-app-muted text-sm font-medium">@{user.username}</p>
+            <p className="text-app-muted text-sm font-medium truncate">@{user.username}</p>
           )}
 
           {memberSinceFormatted && (
@@ -88,7 +91,7 @@ export const ProfileHeader = memo(function ProfileHeader({
           )}
 
           {user.bio && (
-            <p className="text-sm text-app-text/90 mt-2 whitespace-pre-wrap max-w-md leading-relaxed">
+            <p className="text-sm text-app-text/90 mt-2 whitespace-pre-wrap max-w-md leading-relaxed wrap-break-word">
               {user.bio}
             </p>
           )}
@@ -104,13 +107,13 @@ export const ProfileHeader = memo(function ProfileHeader({
         </div>
       </div>
 
-      <div className="flex items-center gap-2.5 self-end sm:self-start shrink-0">
+      <div className="flex items-center gap-2.5 w-full md:w-auto justify-end shrink-0 pt-4 md:pt-0 border-t md:border-t-0 border-app-border/40">
         {isOwnProfile ? (
           !isEditing && (
             <button
               type="button"
               onClick={onEditClick}
-              className="bg-app-bg border border-app-border hover:bg-app-card text-app-text px-4 py-2.5 rounded-xl transition-all font-medium cursor-pointer text-sm shadow-xs active:scale-95"
+              className="w-full md:w-auto bg-app-bg border border-app-border hover:bg-app-card text-app-text px-4 py-2.5 rounded-xl transition-all font-medium cursor-pointer text-sm shadow-xs active:scale-95 text-center"
             >
               Editar Perfil
             </button>
@@ -122,7 +125,10 @@ export const ProfileHeader = memo(function ProfileHeader({
                 type="button"
                 onClick={handleStartChat}
                 disabled={isStartingChat}
-                className="inline-flex items-center justify-center gap-2 bg-app-card text-app-text border border-app-border hover:bg-app-bg px-4 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer shadow-xs disabled:opacity-60 active:scale-95"
+                className="inline-flex items-center justify-center gap-2 bg-app-card text-app-text 
+                border border-app-border hover:bg-app-bg px-4 py-2.5 rounded-xl text-sm 
+                font-semibold transition-all cursor-pointer shadow-xs disabled:opacity-60 
+                active:scale-95"
               >
                 {isStartingChat ? (
                   <Loader2 className="w-4 h-4 animate-spin text-app-accent" />
@@ -141,6 +147,7 @@ export const ProfileHeader = memo(function ProfileHeader({
           )
         )}
       </div>
+
     </div>
   );
 });

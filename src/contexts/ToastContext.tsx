@@ -51,7 +51,7 @@ export function ToastProvider({ children }: ToastProviderProps) {
               <span>
                 {toast.type === 'success' && ''}
                 {toast.type === 'error' && '❌'}
-                {toast.type === 'info' && '📌'}
+                {toast.type === 'info' && ''}
               </span>
               <span>{toast.message}</span>
             </div>

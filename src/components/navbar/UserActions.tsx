@@ -20,19 +20,21 @@ export const UserActions = memo(function UserActions({
 
   if (!isAuthenticated) {
     return (
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
         <button
           type="button"
           onClick={onOpenThemeModal}
           title="Aparência e Tema"
-          className="p-2 rounded-xl text-app-muted hover:text-app-text hover:bg-app-bg/50 transition-colors cursor-pointer"
+          className="p-2 rounded-xl text-app-muted hover:text-app-text hover:bg-app-bg/50 
+          transition-colors cursor-pointer shrink-0"
         >
           <Palette className="w-4 h-4 text-app-accent" />
         </button>
 
         <Link
           to="/login"
-          className="bg-app-bg border border-app-border hover:border-app-accent/40 text-app-text px-4 py-2 rounded-xl transition-all text-xs font-semibold"
+          className="bg-app-bg border border-app-border hover:border-app-accent/40 text-app-text px-3 
+          py-2 sm:px-4 rounded-xl transition-all text-xs font-semibold whitespace-nowrap shrink-0"
         >
           Fazer Login
         </Link>
@@ -41,23 +43,24 @@ export const UserActions = memo(function UserActions({
   }
 
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex items-center gap-1 sm:gap-3 shrink-0">
       <button
         type="button"
         onClick={onOpenModal}
-        className="bg-app-accent text-app-accent-text hover:opacity-90 px-4 py-2 rounded-xl transition-all cursor-pointer font-medium text-xs sm:text-sm flex items-center gap-1.5 shadow-xs active:scale-95"
+        title="Novo Post-it"
+        className="bg-app-accent text-app-accent-text hover:opacity-90 p-2 sm:px-4 sm:py-2 rounded-xl transition-all cursor-pointer font-medium text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-xs active:scale-95 shrink-0"
       >
         <Plus className="w-4 h-4" />
         <span className="hidden sm:inline">Novo Post-it</span>
       </button>
 
-      <div className="h-4 w-px bg-app-border mx-1 hidden sm:block" />
+      <div className="h-4 w-px bg-app-border mx-0.5 hidden sm:block" />
 
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-0.5 sm:gap-1 shrink-0">
         <Link
           to="/perfil"
           title="Meu Perfil"
-          className={`p-2 rounded-xl transition-colors ${
+          className={`p-1.5 sm:p-2 rounded-xl transition-colors ${
             isActive('/perfil') ? 'bg-app-accent/10 text-app-accent' : 'text-app-muted hover:text-app-text hover:bg-app-bg/50'
           }`}
         >
@@ -68,7 +71,7 @@ export const UserActions = memo(function UserActions({
           type="button"
           onClick={onOpenThemeModal}
           title="Personalizar Tema"
-          className="p-2 text-app-muted hover:text-app-text hover:bg-app-bg/50 rounded-xl cursor-pointer transition-colors"
+          className="p-1.5 sm:p-2 text-app-muted hover:text-app-text hover:bg-app-bg/50 rounded-xl cursor-pointer transition-colors"
         >
           <Palette className="w-4 h-4 text-app-accent" />
         </button>
@@ -76,7 +79,7 @@ export const UserActions = memo(function UserActions({
         <Link
           to="/settings"
           title="Configurações"
-          className={`p-2 rounded-xl transition-colors ${
+          className={`p-1.5 sm:p-2 rounded-xl transition-colors ${
             isActive('/settings') ? 'bg-app-accent/10 text-app-accent' : 'text-app-muted hover:text-app-text hover:bg-app-bg/50'
           }`}
         >
@@ -87,7 +90,7 @@ export const UserActions = memo(function UserActions({
           type="button"
           onClick={logout} 
           title="Sair"
-          className="p-2 text-app-muted hover:text-red-400 hover:bg-red-500/10 rounded-xl cursor-pointer transition-colors"
+          className="p-1.5 sm:p-2 text-app-muted hover:text-red-400 hover:bg-red-500/10 rounded-xl cursor-pointer transition-colors"
         >
           <LogOut className="w-4 h-4" />
         </button>

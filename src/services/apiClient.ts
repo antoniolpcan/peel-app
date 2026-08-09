@@ -59,14 +59,6 @@ export async function apiFetch<T>(
 ): Promise<T> {
   const { auth = false, headers: customHeaders, body, ...customConfig } = init;
 
-  const isPlainObject =
-    body &&
-    typeof body === 'object' &&
-    !(body instanceof FormData) &&
-    !(body instanceof URLSearchParams) &&
-    !(body instanceof Blob) &&
-    !(body instanceof ArrayBuffer);
-
   const headers = new Headers(getHeaders(auth));
 
   if (customHeaders) {
@@ -75,12 +67,19 @@ export async function apiFetch<T>(
     });
   }
 
-  if (isPlainObject && !headers.has('Content-Type')) {
+  const isJsonPayload =
+    body &&
+    !(body instanceof FormData) &&
+    !(body instanceof URLSearchParams) &&
+    !(body instanceof Blob) &&
+    !(body instanceof ArrayBuffer);
+
+  if (isJsonPayload && !headers.has('Content-Type')) {
     headers.set('Content-Type', 'application/json');
   }
 
   let formattedBody: BodyInit | null = body as BodyInit | null;
-  if (isPlainObject) {
+  if (body && typeof body === 'object' && isJsonPayload) {
     formattedBody = JSON.stringify(body);
   }
 

@@ -12,7 +12,7 @@ export const userSettingsService = {
     return apiFetch<UserSettingResponse>(`${BASE_URL}/user_settings/`, {
       method: 'PATCH',
       headers: getHeaders(true),
-      body: JSON.stringify(data),
+      body: {data},
     });
   },
 };

@@ -38,8 +38,8 @@ export function useProfileFollow(
     );
   }, [following]);
 
-  const handleToggleFollow = useCallback(async (targetId?: number) => {
-    const targetUserId = targetId || profileUserId;
+  const handleToggleFollow = useCallback(async (targetId?: number | unknown) => {
+    const targetUserId = typeof targetId === 'number' ? targetId : profileUserId;
 
     if (!targetUserId || targetUserId === loggedUserId) return;
 
