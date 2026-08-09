@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Sparkles, Pin, CheckCircle2, Bell, MessageSquare } from 'lucide-react';
+import { Lightbulb, ListChecks, Bell, MessageSquare, CheckCircle2 } from 'lucide-react';
+import logoSvg from '../../assets/logo.svg';
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -14,7 +15,7 @@ interface AuthLayoutProps {
 const POSTIT_TYPES = {
   ideia: {
     label: 'Ideia',
-    icon: Pin,
+    icon: Lightbulb, // Lâmpada no lugar do Pin
     cardBg: 'bg-yellow-200 dark:bg-yellow-300 text-slate-900',
     headerText: 'text-yellow-900',
     iconColor: 'text-yellow-800',
@@ -23,7 +24,7 @@ const POSTIT_TYPES = {
   },
   checklist: {
     label: 'Checklist',
-    icon: Sparkles,
+    icon: ListChecks, // Lista de checagem no lugar do Sparkles
     cardBg: 'bg-indigo-200 dark:bg-indigo-300 text-slate-900',
     headerText: 'text-indigo-900',
     iconColor: 'text-indigo-800',
@@ -97,8 +98,8 @@ export function AuthLayout({
         
         <div className="hidden lg:flex lg:col-span-5 flex-col gap-6 p-2">
           <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-2xl bg-app-accent flex items-center justify-center shadow-lg shadow-app-accent/30 text-white font-extrabold text-xl">
-              🌿
+            <div className="w-20 h-20 rounded-2xl bg-app-card flex items-center justify-center shadow-lg shadow-app-bg/30 p-2">
+              <img src={logoSvg} alt="Logo Peel" className="w-full h-full object-contain" />
             </div>
             <span className="text-2xl font-black tracking-tight text-app-text">Peel</span>
           </div>
@@ -149,7 +150,7 @@ export function AuthLayout({
           <div className="w-full max-w-md bg-app-card/60 backdrop-blur-xl border border-app-border/80 rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden transition-all">
             <div className="absolute top-0 right-0 w-12 h-12 bg-app-accent/10 border-b border-l border-app-border/60 rounded-bl-2xl pointer-events-none" />
             <div className="flex lg:hidden items-center justify-center gap-2 mb-6">
-              <span className="text-2xl">🌿</span>
+              <img src={logoSvg} alt="Logo Peel" className="w-8 h-8 object-contain" />
               <span className="text-xl font-bold tracking-tight text-app-text">Peel</span>
             </div>
             <div className="text-center mb-6">

@@ -28,7 +28,7 @@ export function Login() {
       const response = await executeLogin(email, password);
 
       if (response?.access_token) {
-        addToast('Bem-vindo de volta! 🌿', 'success');
+        addToast('Bem-vindo de volta!', 'success');
         saveSession(response.access_token);
       }
     },
