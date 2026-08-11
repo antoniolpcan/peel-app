@@ -1,4 +1,4 @@
-import { BASE_URL, getHeaders, apiFetch } from './apiClient';
+import { apiFetch } from './apiClient';
 import type { CommentResponse, GetPostsParams, PostBase, PostResponse, PostUpdate } from './types';
 
 export const postService = {
@@ -14,57 +14,57 @@ export const postService = {
     });
 
     const queryString = new URLSearchParams(filteredParams).toString();
-    return apiFetch<PostResponse[]>(`${BASE_URL}/posts?${queryString}`, {
-      headers: getHeaders(true),
+    return apiFetch<PostResponse[]>(`/posts?${queryString}`, {
+      auth: true,
     });
   },
 
   getPostById: async (postId: number): Promise<PostResponse> => {
-    return apiFetch<PostResponse>(`${BASE_URL}/posts/${postId}`, {
-      headers: getHeaders(true),
+    return apiFetch<PostResponse>(`/posts/${postId}`, {
+      auth: true,
     });
   },
 
   createPost: async (data: PostBase): Promise<PostResponse> => {
-    return apiFetch<PostResponse>(`${BASE_URL}/posts`, {
+    return apiFetch<PostResponse>('/posts', {
       method: 'POST',
-      headers: getHeaders(true),
-      body: JSON.stringify(data),
+      body: data,
+      auth: true,
     });
   },
 
   updatePost: async (postId: number, data: PostUpdate): Promise<PostResponse> => {
-    return apiFetch<PostResponse>(`${BASE_URL}/posts/${postId}`, {
-      method: 'POST',
-      headers: getHeaders(true),
-      body: JSON.stringify(data),
+    return apiFetch<PostResponse>(`/posts/${postId}`, {
+      method: 'PATCH',
+      body: data,
+      auth: true,
     });
   },
 
-  deletePost: async (postId: number): Promise<void> => {
-    return apiFetch<void>(`${BASE_URL}/posts/${postId}`, {
+  deletePost: async (postId: number): Promise<boolean> => {
+    return apiFetch<boolean>(`/posts/${postId}`, {
       method: 'DELETE',
-      headers: getHeaders(true),
+      auth: true,
     });
   },
 
   likePost: async (postId: number): Promise<PostResponse> => {
-    return apiFetch<PostResponse>(`${BASE_URL}/posts/${postId}/like`, {
+    return apiFetch<PostResponse>(`/posts/${postId}/like`, {
       method: 'POST',
-      headers: getHeaders(true),
+      auth: true,
     });
   },
 
-  getComments: async (postId: number): Promise<CommentResponse[]> => {
-    return apiFetch<CommentResponse[]>(`${BASE_URL}/posts/${postId}/comments`, {
-      headers: getHeaders(false),
-    });
+  getComments: async (postId: number, skip = 0, limit = 50): Promise<CommentResponse[]> => {
+    const params = new URLSearchParams({ skip: String(skip), limit: String(limit) });
+    return apiFetch<CommentResponse[]>(`/posts/${postId}/comments?${params.toString()}`);
   },
 
   createComment: async (postId: number, content: string): Promise<CommentResponse> => {
-    return apiFetch<CommentResponse>(`${BASE_URL}/posts/${postId}/comments?content=${encodeURIComponent(content)}`, {
+  const params = new URLSearchParams({ content });
+      return apiFetch<CommentResponse>(`/posts/${postId}/comments?${params.toString()}`, {
       method: 'POST',
-      headers: getHeaders(true),
+      auth: true,
     });
   },
 };

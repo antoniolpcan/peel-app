@@ -2,13 +2,14 @@ import { useCallback, useEffect, useState } from 'react';
 import { followService } from '@/services/followService';
 import type { FollowerResponse, FollowingResponse, FollowStatsResponse } from '@/services/types';
 
-export function useFollowers(userId: number) {
+export function useFollowers(userId: number | null | undefined, skip = 0, limit = 50) {
   const [followers, setFollowers] = useState<FollowerResponse[]>([]);
-  const [loading, setLoading] = useState(Boolean(userId));
+  const [loading, setLoading] = useState<boolean>(Boolean(userId));
   const [error, setError] = useState<string | null>(null);
 
   const fetchFollowers = useCallback(async () => {
     if (!userId) {
+      setFollowers([]);
       setLoading(false);
       return;
     }
@@ -16,14 +17,15 @@ export function useFollowers(userId: number) {
     try {
       setLoading(true);
       setError(null);
-      const data = await followService.getFollowers(userId);
-      setFollowers(data);
-    } catch (err: any) {
-      setError(err.message || 'Erro ao buscar seguidores');
+      const data = await followService.getFollowers(userId, skip, limit);
+      setFollowers((prev) => (skip === 0 ? data : [...prev, ...data]));
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Erro ao buscar seguidores.';
+      setError(msg);
     } finally {
       setLoading(false);
     }
-  }, [userId]);
+  }, [userId, skip, limit]);
 
   useEffect(() => {
     fetchFollowers();
@@ -38,13 +40,14 @@ export function useFollowers(userId: number) {
   };
 }
 
-export function useFollowStats(userId: number) {
+export function useFollowStats(userId: number | null | undefined) {
   const [stats, setStats] = useState<FollowStatsResponse | null>(null);
-  const [loading, setLoading] = useState(Boolean(userId));
+  const [loading, setLoading] = useState<boolean>(Boolean(userId));
   const [error, setError] = useState<string | null>(null);
 
   const fetchStats = useCallback(async () => {
     if (!userId) {
+      setStats(null);
       setLoading(false);
       return;
     }
@@ -54,8 +57,9 @@ export function useFollowStats(userId: number) {
       setError(null);
       const data = await followService.getFollowStats(userId);
       setStats(data);
-    } catch (err: any) {
-      setError(err.message || 'Erro ao carregar estatísticas');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Erro ao carregar estatísticas.';
+      setError(msg);
     } finally {
       setLoading(false);
     }
@@ -74,13 +78,14 @@ export function useFollowStats(userId: number) {
   };
 }
 
-export function useFollowing(userId: number) {
+export function useFollowing(userId: number | null | undefined, skip = 0, limit = 50) {
   const [following, setFollowing] = useState<FollowingResponse[]>([]);
-  const [loading, setLoading] = useState(Boolean(userId));
+  const [loading, setLoading] = useState<boolean>(Boolean(userId));
   const [error, setError] = useState<string | null>(null);
 
   const fetchFollowing = useCallback(async () => {
     if (!userId) {
+      setFollowing([]);
       setLoading(false);
       return;
     }
@@ -88,14 +93,15 @@ export function useFollowing(userId: number) {
     try {
       setLoading(true);
       setError(null);
-      const data = await followService.getFollowing(userId);
-      setFollowing(data);
-    } catch (err: any) {
-      setError(err.message || 'Erro ao buscar usuários seguidos');
+      const data = await followService.getFollowing(userId, skip, limit);
+      setFollowing((prev) => (skip === 0 ? data : [...prev, ...data]));
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Erro ao buscar usuários seguidos.';
+      setError(msg);
     } finally {
       setLoading(false);
     }
-  }, [userId]);
+  }, [userId, skip, limit]);
 
   useEffect(() => {
     fetchFollowing();
@@ -111,30 +117,37 @@ export function useFollowing(userId: number) {
 }
 
 export function useFollowActions() {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const followUser = useCallback(async (userId: number) => {
+  const followUser = useCallback(async (userId: number): Promise<FollowerResponse | null> => {
     try {
       setLoading(true);
+      setError(null);
       return await followService.followUser({ following_id: userId });
-    } catch (err) {
-      return false;
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Erro ao seguir usuário.';
+      setError(msg);
+      return null;
     } finally {
       setLoading(false);
     }
   }, []);
 
-  const unfollowUser = useCallback(async (userId: number) => {
+  const unfollowUser = useCallback(async (userId: number): Promise<boolean> => {
     try {
       setLoading(true);
+      setError(null);
       const success = await followService.unfollowUser(userId);
       return success ?? true;
-    } catch (err) {
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Erro ao deixar de seguir usuário.';
+      setError(msg);
       return false;
     } finally {
       setLoading(false);
     }
   }, []);
 
-  return { followUser, unfollowUser, loading };
+  return { followUser, unfollowUser, loading, error };
 }

@@ -1,4 +1,11 @@
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api/v1';
+export const BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api/v1';
+export const WS_BASE_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:8000/api/v1';
+
+interface FastAPIErrorDetail {
+  msg?: string;
+  type?: string;
+  loc?: (string | number)[];
+}
 
 export function getHeaders(isAuthenticated = false): HeadersInit {
   const headers: Record<string, string> = {};
@@ -26,8 +33,8 @@ export async function handleResponse<T>(response: Response): Promise<T> {
     if (errorData.detail) {
       if (Array.isArray(errorData.detail)) {
         message = errorData.detail
-          .map((item: any) => {
-            if (typeof item.msg === 'string') {
+          .map((item: FastAPIErrorDetail) => {
+            if (typeof item?.msg === 'string') {
               return item.msg.replace(/^Value error,\s*/i, '');
             }
             return 'Dado inválido';
@@ -45,7 +52,13 @@ export async function handleResponse<T>(response: Response): Promise<T> {
     return true as T;
   }
 
-  return response.json();
+  const contentLength = response.headers.get('content-length');
+  if (contentLength === '0') {
+    return {} as T;
+  }
+
+  const text = await response.text();
+  return text ? (JSON.parse(text) as T) : ({} as T);
 }
 
 export interface ApiFetchOptions extends Omit<RequestInit, 'body'> {
@@ -83,6 +96,13 @@ export async function apiFetch<T>(
     formattedBody = JSON.stringify(body);
   }
 
+  let targetUrl: RequestInfo | URL = input;
+  if (typeof input === 'string' && !input.startsWith('http://') && !input.startsWith('https://')) {
+    const cleanBaseUrl = BASE_URL.endsWith('/') ? BASE_URL.slice(0, -1) : BASE_URL;
+    const cleanInput = input.startsWith('/') ? input : `/${input}`;
+    targetUrl = `${cleanBaseUrl}${cleanInput}`;
+  }
+
   const config: RequestInit = {
     ...customConfig,
     headers,
@@ -90,14 +110,15 @@ export async function apiFetch<T>(
   };
 
   try {
-    const response = await fetch(input, config);
+    const response = await fetch(targetUrl, config);
     return await handleResponse<T>(response);
-  } catch (error: any) {
-    if (error.message === 'Failed to fetch' || error.name === 'TypeError') {
-      throw new Error('Não foi possível se conectar ao servidor.');
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      if (error.message === 'Failed to fetch' || error.name === 'TypeError') {
+        throw new Error('Não foi possível se conectar ao servidor.');
+      }
+      throw error;
     }
-    throw error;
+    throw new Error('Erro desconhecido ao processar a requisição.');
   }
 }
-
-export { BASE_URL };

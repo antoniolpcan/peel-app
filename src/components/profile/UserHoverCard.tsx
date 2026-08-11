@@ -2,6 +2,7 @@ import React, { useState, useCallback, memo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { MessageSquare, Loader2 } from 'lucide-react';
 import { useChat } from '@/hooks/useChat';
+import { useToast } from '@/contexts/ToastContext';
 
 import { UserAvatar } from './UserAvatar';
 import { FollowButton } from '@/components/ui/FollowButton';
@@ -30,38 +31,39 @@ export const UserHoverCard = memo(function UserHoverCard({
 }: UserHoverCardProps) {
   const navigate = useNavigate();
   const { startDirectChat } = useChat();
+  const { addToast } = useToast();
   const [isStartingChat, setIsStartingChat] = useState(false);
 
-  const handleStartChat = useCallback(async (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleStartChat = useCallback(
+    async (e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
 
-    let isMounted = true;
-    try {
-      setIsStartingChat(true);
-      const chat = await startDirectChat(userId);
-      navigate('/chat', { state: { selectedChatId: chat.id } });
-    } catch (err) {
-    } finally {
-      if (isMounted) {
+      try {
+        setIsStartingChat(true);
+        const chat = await startDirectChat(userId);
+        navigate('/chat', { state: { selectedChatId: chat.id } });
+      } catch {
+        addToast('Erro ao iniciar conversa. Tente novamente.', 'error');
+      } finally {
         setIsStartingChat(false);
       }
-    }
-    return () => { isMounted = false; };
-  }, [navigate, startDirectChat, userId]);
+    },
+    [navigate, startDirectChat, userId, addToast]
+  );
 
-  const handleFollowClick = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    onToggleFollow(userId);
-  }, [onToggleFollow, userId]);
+  const handleFollowClick = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      onToggleFollow(userId);
+    },
+    [onToggleFollow, userId]
+  );
 
-  const isStatsLoading = stats === undefined;
+  const isStatsLoading = stats === undefined || stats === null;
 
   return (
-    <div
-      className="w-68 bg-app-card rounded-2xl p-4 shadow-2xl border 
-        border-app-border animate-in fade-in zoom-in-95 duration-150 pointer-events-auto transition-colors"
-    >
+    <div className="w-68 bg-app-card rounded-2xl p-4 shadow-2xl border border-app-border animate-in fade-in zoom-in-95 duration-150 pointer-events-auto transition-colors">
       <div className="flex justify-between items-start mb-3">
         <Link to={`/perfil/${userId}`} className="hover:opacity-80 transition-opacity">
           <UserAvatar name={user.name} avatar={user.avatar} size="md" />
@@ -117,11 +119,11 @@ export const UserHoverCard = memo(function UserHoverCard({
         ) : (
           <>
             <div>
-              <span className="font-bold text-app-text">{stats?.followers_count ?? 0}</span>{' '}
+              <span className="font-bold text-app-text">{stats.followers_count ?? 0}</span>{' '}
               <span className="text-app-muted">Seguidores</span>
             </div>
             <div>
-              <span className="font-bold text-app-text">{stats?.following_count ?? 0}</span>{' '}
+              <span className="font-bold text-app-text">{stats.following_count ?? 0}</span>{' '}
               <span className="text-app-muted">Seguindo</span>
             </div>
           </>

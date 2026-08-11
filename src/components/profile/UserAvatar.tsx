@@ -1,4 +1,4 @@
-import { useState, memo } from 'react';
+import { useState, useEffect, memo } from 'react';
 import type { MediaFileBase } from '@/services/types';
 
 interface UserAvatarProps {
@@ -28,6 +28,10 @@ export const UserAvatar = memo(function UserAvatar({
 
   const avatarUrl = typeof avatar === 'string' ? avatar : avatar?.url;
 
+  useEffect(() => {
+    setHasError(false);
+  }, [avatarUrl]);
+
   const initial = (name.trim().charAt(0) || '?').toUpperCase();
   const finalSizeClass = sizeClass || sizeMap[size]?.box || sizeMap.md.box;
   const finalTextSizeClass = textSizeClass || sizeMap[size]?.text || sizeMap.md.text;
@@ -45,6 +49,8 @@ export const UserAvatar = memo(function UserAvatar({
 
   return (
     <div
+      role="img"
+      aria-label={`Avatar de ${name}`}
       className={`${finalSizeClass} ${finalTextSizeClass} bg-app-accent text-app-accent-text rounded-full flex items-center justify-center font-bold shadow-xs shrink-0 select-none transition-colors`}
     >
       {initial}

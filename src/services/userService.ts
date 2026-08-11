@@ -1,33 +1,28 @@
-import { BASE_URL, getHeaders, apiFetch } from './apiClient';
+import { apiFetch } from './apiClient';
 import type { BasicUserResponse, UserCreate, UserResponse, UserUpdate } from './types';
 
 export const userService = {
   createUser: async (data: UserCreate): Promise<UserResponse> => {
-    return apiFetch<UserResponse>(`${BASE_URL}/users`, {
+    return apiFetch<UserResponse>('/users', {
       method: 'POST',
-      headers: getHeaders(false),
-      body: JSON.stringify(data),
+      body: data,
     });
   },
 
-  getUsers: async (skip = 0, limit = 100): Promise<BasicUserResponse[]> => {
+  getUsers: async (skip = 0, limit = 50): Promise<BasicUserResponse[]> => {
     const params = new URLSearchParams({ skip: String(skip), limit: String(limit) });
-    return apiFetch<BasicUserResponse[]>(`${BASE_URL}/users?${params.toString()}`, {
-      headers: getHeaders(false),
-    });
+    return apiFetch<BasicUserResponse[]>(`/users?${params.toString()}`);
   },
 
   getUserById: async (userId: number): Promise<BasicUserResponse> => {
-    return apiFetch<BasicUserResponse>(`${BASE_URL}/users/${userId}`, {
-      headers: getHeaders(false),
-    });
+    return apiFetch<BasicUserResponse>(`/users/${userId}`);
   },
 
   updateMe: async (data: UserUpdate): Promise<UserResponse> => {
-    return apiFetch<UserResponse>(`${BASE_URL}/users/me`, {
+    return apiFetch<UserResponse>('/users/me', {
       method: 'PATCH',
-      headers: getHeaders(true),
-      body: JSON.stringify(data),
+      body: data,
+      auth: true,
     });
   },
 };

@@ -1,38 +1,38 @@
-import { BASE_URL, getHeaders, apiFetch } from './apiClient';
+import { apiFetch } from './apiClient';
 import type { ChatResponse, MessageCreate, MessageResponse, UnreadSummaryResponse } from './types';
 
 export const chatService = {
   startDirectChat: async (targetUserId: number): Promise<ChatResponse> => {
-    return apiFetch<ChatResponse>(`${BASE_URL}/chat/direct/${targetUserId}`, {
+    return apiFetch<ChatResponse>(`/chat/direct/${targetUserId}`, {
       method: 'POST',
-      headers: getHeaders(true),
+      auth: true,
     });
   },
 
   listMyChats: async (): Promise<ChatResponse[]> => {
-    return apiFetch<ChatResponse[]>(`${BASE_URL}/chat/`, {
-      headers: getHeaders(true),
+    return apiFetch<ChatResponse[]>('/chat/', {
+      auth: true,
     });
   },
 
   getUnreadSummary: async (): Promise<UnreadSummaryResponse> => {
-    return apiFetch<UnreadSummaryResponse>(`${BASE_URL}/chat/unread`, {
-      headers: getHeaders(true),
+    return apiFetch<UnreadSummaryResponse>('/chat/unread', {
+      auth: true,
     });
   },
 
   sendMessage: async (chatId: number, data: MessageCreate): Promise<MessageResponse> => {
-    return apiFetch<MessageResponse>(`${BASE_URL}/chat/${chatId}/messages`, {
+    return apiFetch<MessageResponse>(`/chat/${chatId}/messages`, {
       method: 'POST',
-      headers: getHeaders(true),
-      body: JSON.stringify(data),
+      auth: true,
+      body: data,
     });
   },
 
   getMessages: async (chatId: number, skip = 0, limit = 50): Promise<MessageResponse[]> => {
     const params = new URLSearchParams({ skip: String(skip), limit: String(limit) });
-    return apiFetch<MessageResponse[]>(`${BASE_URL}/chat/${chatId}/messages?${params.toString()}`, {
-      headers: getHeaders(true),
+    return apiFetch<MessageResponse[]>(`/chat/${chatId}/messages?${params.toString()}`, {
+      auth: true,
     });
   },
 };

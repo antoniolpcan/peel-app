@@ -1,4 +1,4 @@
-import type { MediaFileBase } from './base';
+import type { MediaFileBase } from "./base";
 
 export interface BasicUserResponse {
   id: number;

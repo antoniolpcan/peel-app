@@ -9,12 +9,6 @@ import { PostPinboard } from '@/components/posts/PostPinboard';
 import { PostModalsManager } from '@/components/posts/PostModalsManager';
 import { ColorFilter } from '@/components/ui/ColorFilter';
 import { SearchInput } from '@/components/ui/SearchInput';
-import type { BasicUserResponse } from '@/services/types';
-
-type PostWithUser = {
-  user?: (BasicUserResponse & { is_following?: boolean }) | null;
-  author?: (BasicUserResponse & { is_following?: boolean }) | null;
-};
 
 export type FeedTab = 'public' | 'following';
 
@@ -28,7 +22,7 @@ const shuffleArray = <T,>(array: T[]): T[] => {
 };
 
 export function Feed() {
-  const { loggedUserId, isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();
   const [activeTab, setActiveTab] = useState<FeedTab>('public');
 
   const {
@@ -48,7 +42,6 @@ export function Feed() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [selectedColorId, setSelectedColorId] = useState<number | null>(null);
-
   const [shuffleSeed, setShuffleSeed] = useState(0);
 
   const handleOpenCreateModal = useCallback(() => setIsModalOpen(true), []);
@@ -64,22 +57,13 @@ export function Feed() {
     const searchLower = search.toLowerCase().trim();
 
     let result = posts.filter((post) => {
-      const postWithUser = post as typeof post & PostWithUser;
-      const author = postWithUser.user || postWithUser.author;
-      const authorId = post.user_id || author?.id;
-
-      if (activeTab === 'following') {
-        const isOwnPost = Boolean(loggedUserId && authorId === loggedUserId);
-        const isFollowingAuthor = Boolean(author?.is_following);
-
-        if (!isOwnPost && !isFollowingAuthor) {
-          return false;
-        }
+      if (selectedColorId !== null && post.color_id !== selectedColorId) {
+        return false;
       }
 
-      if (selectedColorId !== null && post.color_id !== selectedColorId) return false;
       if (!searchLower) return true;
 
+      const author = post.user;
       const titleMatch = post.title?.toLowerCase().includes(searchLower) ?? false;
       const bodyMatch = post.body?.toLowerCase().includes(searchLower) ?? false;
       const authorNameMatch = author?.name?.toLowerCase().includes(searchLower) ?? false;
@@ -93,7 +77,7 @@ export function Feed() {
     }
 
     return result;
-  }, [posts, selectedColorId, search, activeTab, loggedUserId, shuffleSeed]);
+  }, [posts, selectedColorId, search, activeTab, shuffleSeed]);
 
   const hasActiveFilters = useMemo(
     () => Boolean(search.trim()) || selectedColorId !== null,
@@ -116,9 +100,15 @@ export function Feed() {
             </p>
           </div>
 
-          <div className="flex items-center gap-1.5 p-1 bg-app-card rounded-2xl border border-app-border shrink-0 self-start md:self-auto shadow-xs">
+          <div 
+            role="tablist"
+            aria-label="Opções do Mural"
+            className="flex items-center gap-1.5 p-1 bg-app-card rounded-2xl border border-app-border shrink-0 self-start md:self-auto shadow-xs"
+          >
             <button
               type="button"
+              role="tab"
+              aria-selected={activeTab === 'public'}
               onClick={() => {
                 setActiveTab('public');
                 setShuffleSeed(0);
@@ -134,6 +124,8 @@ export function Feed() {
 
             <button
               type="button"
+              role="tab"
+              aria-selected={activeTab === 'following'}
               onClick={() => {
                 setActiveTab('following');
                 setShuffleSeed(0);

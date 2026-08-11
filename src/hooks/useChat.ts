@@ -1,12 +1,18 @@
-import { chatService, type ChatResponse, type MessageCreate, type MessageResponse, type UnreadSummaryResponse } from '@/services';
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
+import { chatService } from '@/services/chatService';
+import type { ChatResponse, MessageCreate, MessageResponse, UnreadSummaryResponse } from '@/services/types';
 import { useAuth } from '@/contexts/AuthContext';
+import { WS_BASE_URL } from '@/services/apiClient';
 
-export const WS_BASE_URL = import.meta.env.VITE_WS_URL;
+export type ExtendedChatResponse = ChatResponse & {
+  unread_count?: number;
+  unread_messages_count?: number;
+  unreadCount?: number;
+};
 
 export const useChat = (autoFetch = false) => {
   const { loggedUserId } = useAuth();
-  const [chats, setChats] = useState<ChatResponse[]>([]);
+  const [chats, setChats] = useState<ExtendedChatResponse[]>([]);
   const [activeMessages, setActiveMessages] = useState<MessageResponse[]>([]);
   const [unreadSummary, setUnreadSummary] = useState<UnreadSummaryResponse | null>(null);
 
@@ -27,11 +33,7 @@ export const useChat = (autoFetch = false) => {
   const unreadCount = useMemo(() => {
     if (chats.length > 0) {
       return chats.reduce((acc, chat) => {
-        const count =
-          (chat as any).unread_count ??
-          (chat as any).unread_messages_count ??
-          (chat as any).unreadCount ??
-          0;
+        const count = chat.unread_count ?? chat.unread_messages_count ?? chat.unreadCount ?? 0;
         return acc + Number(count);
       }, 0);
     }
@@ -56,10 +58,11 @@ export const useChat = (autoFetch = false) => {
     setError(null);
     try {
       const data = await chatService.listMyChats();
-      setChats(data);
+      setChats(data as ExtendedChatResponse[]);
       await fetchUnreadSummary();
-    } catch (err: any) {
-      setError(err.message || 'Erro ao carregar conversas.');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Erro ao carregar conversas.';
+      setError(msg);
     } finally {
       setLoadingChats(false);
     }
@@ -84,8 +87,8 @@ export const useChat = (autoFetch = false) => {
     setError(null);
     try {
       const messages = await chatService.getMessages(chatId, skip, limit);
-      setActiveMessages(messages);
-
+      
+      setActiveMessages((prev) => (skip === 0 ? messages : [...messages, ...prev]));
       setChats((prev) =>
         prev.map((chat) =>
           chat.id === chatId
@@ -94,8 +97,9 @@ export const useChat = (autoFetch = false) => {
         )
       );
       fetchUnreadSummary();
-    } catch (err: any) {
-      setError(err.message || 'Erro ao carregar mensagens.');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Erro ao carregar mensagens.';
+      setError(msg);
     } finally {
       setLoadingMessages(false);
     }
@@ -109,11 +113,12 @@ export const useChat = (autoFetch = false) => {
       setChats((prev) => {
         const exists = prev.some((c) => c.id === chat.id);
         if (exists) return prev;
-        return [chat, ...prev];
+        return [chat as ExtendedChatResponse, ...prev];
       });
       return chat;
-    } catch (err: any) {
-      setError(err.message || 'Erro ao iniciar conversa.');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Erro ao iniciar conversa.';
+      setError(msg);
       throw err;
     } finally {
       setLoadingChats(false);
@@ -123,9 +128,16 @@ export const useChat = (autoFetch = false) => {
   const sendMessage = useCallback(async (chatId: number, data: MessageCreate) => {
     try {
       const newMsg = await chatService.sendMessage(chatId, data);
+      
+      setActiveMessages((prev) => {
+        if (prev.some((m) => m.id === newMsg.id)) return prev;
+        return [...prev, newMsg];
+      });
+
       return newMsg;
-    } catch (err: any) {
-      setError(err.message || 'Erro ao enviar mensagem.');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Erro ao enviar mensagem.';
+      setError(msg);
       throw err;
     }
   }, []);
@@ -154,7 +166,8 @@ export const useChat = (autoFetch = false) => {
 
       if (!chatId) return;
 
-      const wsUrl = `${WS_BASE_URL}/chat/ws/${chatId}`;
+      const token = localStorage.getItem('@peel:token');
+      const wsUrl = `${WS_BASE_URL}/chat/ws/${chatId}${token ? `?token=${token}` : ''}`;
       const ws = new WebSocket(wsUrl);
 
       ws.onopen = () => {
@@ -166,16 +179,20 @@ export const useChat = (autoFetch = false) => {
       ws.onmessage = (event) => {
         try {
           const newMessage: MessageResponse = JSON.parse(event.data);
+          
+          const isFromOtherUser = newMessage.sender_id !== loggedUserId;
+          const formattedMessage = isFromOtherUser 
+            ? { ...newMessage, is_read: true } 
+            : newMessage;
+
           setActiveMessages((prev) => {
-            if (prev.some((m) => m.id === newMessage.id)) return prev;
-            return [...prev, newMessage];
+            if (prev.some((m) => m.id === formattedMessage.id)) return prev;
+            return [...prev, formattedMessage];
           });
-          if (newMessage.sender_id !== loggedUserId) {
-            markActiveAsRead();
-          }
 
           fetchUnreadSummary();
-        } catch {}
+        } catch {
+        }
       };
 
       ws.onerror = () => {};
@@ -183,7 +200,7 @@ export const useChat = (autoFetch = false) => {
 
       socketRef.current = ws;
     },
-    [disconnectWebSocket, fetchUnreadSummary, loggedUserId, markActiveAsRead]
+    [disconnectWebSocket, fetchUnreadSummary, loggedUserId]
   );
 
   useEffect(() => {

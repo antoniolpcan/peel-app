@@ -2,7 +2,7 @@ import React, { memo } from 'react';
 import { Pin } from 'lucide-react';
 
 interface LikeButtonProps {
-  likes: number;
+  likes?: number;
   onClick: (e: React.MouseEvent<HTMLButtonElement>) => void;
   disabled?: boolean;
   variant?: 'card' | 'modal';

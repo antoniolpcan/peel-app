@@ -23,7 +23,11 @@ export function useProfileEdit(user: BasicUserResponse | null, onUpdateSuccess: 
 
   const startEditing = useCallback(() => {
     if (user) {
-      setEditForm({ name: user.name || '', bio: user.bio || '', username: user.username || '' });
+      setEditForm({ 
+        name: user.name || '', 
+        bio: user.bio || '', 
+        username: user.username || '' 
+      });
       setSelectedAvatarId(user.avatar?.id || null);
       setAvatarPreview(user.avatar?.url || null);
       setIsEditing(true);
@@ -37,6 +41,7 @@ export function useProfileEdit(user: BasicUserResponse | null, onUpdateSuccess: 
     }
 
     setTempImageSrc(null);
+    setAvatarPreview(user?.avatar?.url || null);
     setIsEditing(false);
   }, [tempImageSrc, avatarPreview, user]);
 
@@ -64,16 +69,20 @@ export function useProfileEdit(user: BasicUserResponse | null, onUpdateSuccess: 
       return localPreviewUrl;
     });
 
-    const res = (await uploadImage(croppedFile)) as any;
-    const mediaData = res?.data || res;
+    try {
+      const res = await uploadImage(croppedFile);
+      const mediaData = res?.data;
 
-    if (mediaData?.id) {
-      setSelectedAvatarId(mediaData.id);
-      if (mediaData.url) {
-        revokeBlobUrl(localPreviewUrl);
-        setAvatarPreview(mediaData.url);
+      if (mediaData?.id) {
+        setSelectedAvatarId(mediaData.id);
+        if (mediaData.url) {
+          revokeBlobUrl(localPreviewUrl);
+          setAvatarPreview(mediaData.url);
+        }
+      } else {
+        throw new Error('Upload sem dados válidos.');
       }
-    } else {
+    } catch {
       addToast('Erro ao enviar a imagem. Tente novamente.', 'error');
       revokeBlobUrl(localPreviewUrl);
       setAvatarPreview(user?.avatar?.url || null);
@@ -101,8 +110,11 @@ export function useProfileEdit(user: BasicUserResponse | null, onUpdateSuccess: 
   useEffect(() => {
     return () => {
       revokeBlobUrl(tempImageSrc);
+      if (avatarPreview && avatarPreview !== user?.avatar?.url) {
+        revokeBlobUrl(avatarPreview);
+      }
     };
-  }, [tempImageSrc]);
+  }, [tempImageSrc, avatarPreview, user]);
 
   return {
     isEditing,

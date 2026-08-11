@@ -37,13 +37,4 @@ export interface GetPostsParams {
   sort_order?: SortOrder;
 }
 
-export interface SearchPostParams {
-  skip?: number; 
-  limit?: number; 
-  title?: string; 
-  body?: string; 
-  user_id?: number; 
-  following_for_user_id?: number; 
-  order_by?: string; 
-  sort_order?: string;
-}
+export type SearchPostParams = GetPostsParams;

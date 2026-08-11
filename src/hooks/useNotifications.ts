@@ -1,8 +1,8 @@
-import { notificationService, type NotificationCreate, type NotificationResponse } from '@/services';
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
+import { notificationService } from '@/services/notificationService';
+import type { NotificationCreate, NotificationResponse } from '@/services/types';
 import { useAuth } from '@/contexts/AuthContext';
-
-export const WS_BASE_URL = import.meta.env.VITE_WS_URL;
+import { WS_BASE_URL } from '@/services/apiClient';
 
 export const useNotifications = (autoFetch = true) => {
   const { loggedUserId } = useAuth();
@@ -12,32 +12,23 @@ export const useNotifications = (autoFetch = true) => {
   const socketRef = useRef<WebSocket | null>(null);
 
   const fetchNotifications = useCallback(async (skip = 0, limit = 20) => {
-    let isMounted = true;
     setLoading(true);
     setError(null);
     try {
       const data = await notificationService.listNotifications(skip, limit);
-      if (isMounted) {
-        setNotifications(data);
-      }
-    } catch (err: any) {
-      if (isMounted) {
-        setError(err.message || 'Erro ao carregar notificações.');
-      }
+      setNotifications((prev) => (skip === 0 ? data : [...prev, ...data]));
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Erro ao carregar notificações.';
+      setError(msg);
     } finally {
-      if (isMounted) {
-        setLoading(false);
-      }
+      setLoading(false);
     }
   }, []);
 
   const markAsRead = useCallback(async (notificationId: number) => {
-    let previousNotifications: NotificationResponse[] = [];
-
-    setNotifications((prev) => {
-      previousNotifications = prev;
-      return prev.map((n) => (n.id === notificationId ? { ...n, is_read: true } : n));
-    });
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === notificationId ? { ...n, is_read: true } : n))
+    );
 
     try {
       const updated = await notificationService.markAsRead(notificationId);
@@ -45,18 +36,34 @@ export const useNotifications = (autoFetch = true) => {
         prev.map((n) => (n.id === notificationId ? updated : n))
       );
       return updated;
-    } catch (err: any) {
-      setNotifications(previousNotifications);
-      setError(err.message || 'Erro ao marcar notificação como lida.');
+    } catch (err: unknown) {
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === notificationId ? { ...n, is_read: false } : n))
+      );
+      const msg = err instanceof Error ? err.message : 'Erro ao marcar notificação como lida.';
+      setError(msg);
       throw err;
     }
   }, []);
 
+  const markAllAsRead = useCallback(async () => {
+    setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
+
+    try {
+      await notificationService.markAllAsRead();
+    } catch (err: unknown) {
+      fetchNotifications();
+      const msg = err instanceof Error ? err.message : 'Erro ao marcar todas como lidas.';
+      setError(msg);
+    }
+  }, [fetchNotifications]);
+
   const createNotification = useCallback(async (data: NotificationCreate) => {
     try {
       return await notificationService.createNotification(data);
-    } catch (err: any) {
-      setError(err.message || 'Erro ao criar notificação.');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Erro ao criar notificação.';
+      setError(msg);
       throw err;
     }
   }, []);
@@ -65,7 +72,9 @@ export const useNotifications = (autoFetch = true) => {
     if (!loggedUserId) return;
 
     let isComponentMounted = true;
-    const wsUrl = `${WS_BASE_URL}/notifications/ws/${loggedUserId}`;
+    const token = localStorage.getItem('@peel:token');
+    
+    const wsUrl = `${WS_BASE_URL}/notifications/ws/${loggedUserId}${token ? `?token=${token}` : ''}`;
     const ws = new WebSocket(wsUrl);
 
     ws.onopen = () => {
@@ -87,18 +96,16 @@ export const useNotifications = (autoFetch = true) => {
       }
     };
 
-    ws.onerror = () => {
-    };
-
     socketRef.current = ws;
 
     return () => {
       isComponentMounted = false;
-
-      if (ws.readyState === WebSocket.OPEN) {
+      if (
+        ws.readyState === WebSocket.OPEN ||
+        ws.readyState === WebSocket.CONNECTING
+      ) {
         ws.close();
       }
-
       socketRef.current = null;
     };
   }, [loggedUserId]);
@@ -120,6 +127,7 @@ export const useNotifications = (autoFetch = true) => {
     error,
     fetchNotifications,
     markAsRead,
+    markAllAsRead,
     createNotification,
   };
 };

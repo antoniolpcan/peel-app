@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { useFollowStats, useFollowers, useFollowing } from '@/hooks/useFollows';
-import { useFollowActions } from '@/hooks';
+import { useFollowStats, useFollowers, useFollowing, useFollowActions } from '@/hooks/useFollows';
 import { useToast } from '@/contexts/ToastContext';
+import type { FollowerResponse, FollowingResponse } from '@/services/types';
 
 export function useProfileFollow(
   profileUserId: number, 
@@ -10,19 +10,19 @@ export function useProfileFollow(
   userName?: string
 ) {
   const { addToast } = useToast();
-  const { stats, refetch: refetchStats } = useFollowStats(profileUserId);
-  const { followers, loading: loadingFollowers, refetch: fetchFollowers } = useFollowers(profileUserId);
-  const { following, loading: loadingFollowing, refetch: fetchFollowing } = useFollowing(profileUserId);
+  const { stats, refetchStats } = useFollowStats(profileUserId);
+  const { followers, loading: loadingFollowers, refetchFollowers } = useFollowers(profileUserId);
+  const { following, loading: loadingFollowing, refetchFollowing } = useFollowing(profileUserId);
   const { followUser, unfollowUser, loading: isFollowLoading } = useFollowActions();
 
-  const [isFollowingState, setIsFollowingState] = useState(false);
+  const [isFollowingState, setIsFollowingState] = useState<boolean>(false);
   const [followModalType, setFollowModalType] = useState<'followers' | 'following' | null>(null);
 
   const isAlreadyFollowingOwner = useMemo(() => {
     if (isOwnProfile || !followers || !loggedUserId) return false;
     
     return followers.some(
-      (f: any) => f.follower_id === loggedUserId || f.follower?.id === loggedUserId
+      (f: FollowerResponse) => f.follower_id === loggedUserId || f.follower?.id === loggedUserId
     );
   }, [followers, loggedUserId, isOwnProfile]);
 
@@ -34,7 +34,7 @@ export function useProfileFollow(
     if (!following) return new Set<number>();
     
     return new Set<number>(
-      following.map((f: any) => f.following?.id || f.following_id || f.id)
+      following.map((f: FollowingResponse) => f.following?.id || f.following_id || f.id)
     );
   }, [following]);
 
@@ -60,8 +60,8 @@ export function useProfileFollow(
 
     if (success) {
       refetchStats();
-      fetchFollowers();
-      fetchFollowing();
+      refetchFollowers();
+      refetchFollowing();
 
       const toastMessage = isPageOwner 
         ? (nextState ? `Agora você está seguindo ${userName || 'o usuário'}!` : `Você deixou de seguir ${userName || 'o usuário'}`)
@@ -82,21 +82,21 @@ export function useProfileFollow(
     unfollowUser,
     followUser,
     refetchStats,
-    fetchFollowers,
-    fetchFollowing,
+    refetchFollowers,
+    refetchFollowing,
     userName,
     addToast,
   ]);
 
   const openFollowersModal = useCallback(() => {
     setFollowModalType('followers');
-    fetchFollowers();
-  }, [fetchFollowers]);
+    refetchFollowers();
+  }, [refetchFollowers]);
 
   const openFollowingModal = useCallback(() => {
     setFollowModalType('following');
-    fetchFollowing();
-  }, [fetchFollowing]);
+    refetchFollowing();
+  }, [refetchFollowing]);
 
   return {
     stats,
@@ -111,7 +111,7 @@ export function useProfileFollow(
     handleToggleFollow,
     openFollowersModal,
     openFollowingModal,
-    refetchFollowers: fetchFollowers,
+    refetchFollowers,
     refetchStats,
   };
 }

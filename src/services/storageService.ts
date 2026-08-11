@@ -1,19 +1,20 @@
-import { BASE_URL, apiFetch } from './apiClient';
+import { apiFetch } from './apiClient';
 import type { UploadResponse } from './types';
 
 export const storageService = {
   uploadImage: async (file: File): Promise<UploadResponse> => {
+    const MAX_SIZE_MB = 5;
+    if (file.size > MAX_SIZE_MB * 1024 * 1024) {
+      throw new Error(`A imagem excede o tamanho máximo permitido de ${MAX_SIZE_MB}MB.`);
+    }
+
     const formData = new FormData();
     formData.append('file', file);
 
-    const token = localStorage.getItem('@peel:token');
-    const headers: HeadersInit = {};
-    if (token) headers['Authorization'] = `Bearer ${token}`;
-
-    return apiFetch<UploadResponse>(`${BASE_URL}/storage/upload`, {
+    return apiFetch<UploadResponse>('/storage/upload', {
       method: 'POST',
-      headers,
       body: formData,
+      auth: true,
     });
   },
 };

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useChat } from '@/hooks/useChat';
 import { useAuth } from '@/contexts/AuthContext';
 import { PageLayout } from '@/components/layout/PageLayout';
@@ -8,8 +8,8 @@ import { ChatHeader } from '@/components/chat/ChatHeader';
 import { ChatMessageList } from '@/components/chat/ChatMessageList';
 import { ChatMessageInput } from '@/components/chat/ChatMessageInput';
 import { ChatEmptyState } from '@/components/chat/ChatEmptyState';
-import type { ChatResponse } from '@/services/types';
 import { ChatSidebar } from '@/components/chat/ChatSideBar';
+import type { ChatResponse } from '@/services/types';
 
 function formatDateDivider(dateString: string): string {
   if (!dateString) return '';
@@ -36,8 +36,10 @@ function formatDateDivider(dateString: string): string {
 }
 
 export function ChatPage() {
-  const location = useLocation();
+  const { chatId: urlChatId } = useParams<{ chatId?: string }>();
+  const navigate = useNavigate();
   const { loggedUserId } = useAuth();
+
   const { 
     chats, 
     unreadSenders, 
@@ -51,17 +53,15 @@ export function ChatPage() {
     connectWebSocket, 
     disconnectWebSocket 
   } = useChat(true);
-  
-  const [selectedChatId, setSelectedChatId] = useState<number | null>(null);
+
+  const selectedChatId = useMemo(() => {
+    return urlChatId ? Number(urlChatId) : null;
+  }, [urlChatId]);
+
   const [messageText, setMessageText] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (location.state?.selectedChatId) {
-      setSelectedChatId(location.state.selectedChatId);
-    }
-  }, [location.state]);
+  const previousMessagesLength = useRef(0);
 
   useEffect(() => {
     fetchMyChats();
@@ -69,16 +69,32 @@ export function ChatPage() {
 
   useEffect(() => {
     if (!selectedChatId) return;
+
     fetchMessages(selectedChatId);
     connectWebSocket(selectedChatId);
-    return () => disconnectWebSocket();
+
+    return () => {
+      disconnectWebSocket();
+    };
   }, [selectedChatId, fetchMessages, connectWebSocket, disconnectWebSocket]);
 
   useEffect(() => {
-    if (activeMessages.length > 0) {
+    if (activeMessages.length > previousMessagesLength.current) {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
+    previousMessagesLength.current = activeMessages.length;
   }, [activeMessages]);
+
+  const handleSelectChat = useCallback(
+    (id: number | null) => {
+      if (id) {
+        navigate(`/chat/${id}`);
+      } else {
+        navigate('/chat');
+      }
+    },
+    [navigate]
+  );
 
   const getOtherUser = useCallback(
     (chat: ChatResponse) => {
@@ -142,7 +158,7 @@ export function ChatPage() {
             onSearchChange={setSearchQuery}
             loading={loading}
             getOtherUser={getOtherUser}
-            onSelectChat={setSelectedChatId}
+            onSelectChat={handleSelectChat}
           />
 
           <main
@@ -155,7 +171,7 @@ export function ChatPage() {
                 <ChatHeader
                   selectedChatId={selectedChatId}
                   activeOtherUser={activeOtherUser}
-                  onBack={() => setSelectedChatId(null)}
+                  onBack={() => handleSelectChat(null)}
                 />
 
                 <ChatMessageList

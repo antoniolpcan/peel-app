@@ -1,32 +1,26 @@
-import { userSettingsService, type UserSettingResponse, type UserSettingUpdate } from '@/services';
 import { useState, useCallback, useEffect } from 'react';
+import { userSettingsService } from '@/services/userSettingsService';
+import type { UserSettingResponse, UserSettingUpdate } from '@/services/types';
+import { parseApiError } from '@/utils/errorParser';
 
 export const useUserSettings = (autoFetch = true) => {
   const [settings, setSettings] = useState<UserSettingResponse | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [updating, setUpdating] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
   const fetchSettings = useCallback(async () => {
-    let isMounted = true;
-    setLoading(true);
-    setError(null);
-    
     try {
+      setLoading(true);
+      setError(null);
       const data = await userSettingsService.getMySettings();
-      if (isMounted) {
-        setSettings(data);
-      }
-    } catch (err: any) {
-      if (isMounted) {
-        setError(err.message || 'Erro ao carregar configurações.');
-      }
+      setSettings(data);
+    } catch (err: unknown) {
+      const msg = parseApiError(err) || 'Erro ao carregar configurações.';
+      setError(msg);
     } finally {
-      if (isMounted) {
-        setLoading(false);
-      }
+      setLoading(false);
     }
-
-    return () => { isMounted = false; };
   }, []);
 
   const updateSettings = useCallback(async (data: UserSettingUpdate) => {
@@ -38,19 +32,20 @@ export const useUserSettings = (autoFetch = true) => {
       return { ...prev, ...data } as UserSettingResponse;
     });
 
-    setLoading(true);
+    setUpdating(true);
     setError(null);
 
     try {
       const updated = await userSettingsService.updateMySettings(data);
       setSettings(updated);
       return updated;
-    } catch (err: any) {
+    } catch (err: unknown) {
       setSettings(previousSettings);
-      setError(err.message || 'Erro ao atualizar configurações.');
+      const msg = parseApiError(err) || 'Erro ao atualizar configurações.';
+      setError(msg);
       throw err;
     } finally {
-      setLoading(false);
+      setUpdating(false);
     }
   }, []);
 
@@ -63,6 +58,7 @@ export const useUserSettings = (autoFetch = true) => {
   return {
     settings,
     loading,
+    updating,
     error,
     fetchSettings,
     updateSettings,

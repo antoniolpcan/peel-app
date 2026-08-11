@@ -7,17 +7,18 @@ import { ThemePreviewModal } from '@/components/ui/ThemePreviewModal';
 import { NavBrand } from './NavBrand';
 import { NavLinks } from './NavLinks';
 import { UserActions } from './UserActions';
+import { MobileBottomNav } from './MobileBottomNav';
 
 interface NavbarProps {
   isAuthenticated: boolean;
   logout: () => void;
-  setIsModalOpen: (value: boolean) => void;
+  onOpenCreateModal?: () => void;
 }
 
 export const Navbar = memo(function Navbar({
   isAuthenticated,
   logout,
-  setIsModalOpen,
+  onOpenCreateModal,
 }: NavbarProps) {
   const { unreadCount: unreadNotificationsCount } = useNotifications(isAuthenticated);
   const { unreadCount: unreadMessagesCount } = useChat(isAuthenticated);
@@ -26,10 +27,6 @@ export const Navbar = memo(function Navbar({
   const { setTheme } = useTheme();
 
   const [isThemeModalOpen, setIsThemeModalOpen] = useState(false);
-
-  const handleOpenModal = useCallback(() => {
-    setIsModalOpen(true);
-  }, [setIsModalOpen]);
 
   const handleOpenThemeModal = useCallback(() => {
     setIsThemeModalOpen(true);
@@ -47,24 +44,32 @@ export const Navbar = memo(function Navbar({
 
   return (
     <>
-      <header className="bg-app-card/80 backdrop-blur-md border-b border-app-border 
-        px-3 sm:px-6 py-2.5 sm:py-3 sticky top-0 z-50 transition-colors">
-        <div className="max-w-7xl mx-auto flex justify-between items-center gap-2 min-w-0">
+      <header className="bg-app-card/80 backdrop-blur-md border-b border-app-border px-4 sm:px-6 py-2.5 sm:py-3 sticky top-0 z-40 transition-colors">
+        <div className="max-w-7xl mx-auto flex justify-between items-center gap-2">
           <NavBrand />
           
-          <NavLinks 
-            unreadNotificationsCount={unreadNotificationsCount}
-            unreadMessagesCount={unreadMessagesCount}
-          />
+          <div className="hidden md:block">
+            <NavLinks 
+              unreadNotificationsCount={unreadNotificationsCount}
+              unreadMessagesCount={unreadMessagesCount}
+            />
+          </div>
 
           <UserActions 
             isAuthenticated={isAuthenticated} 
             logout={logout} 
-            onOpenModal={handleOpenModal}
+            onOpenModal={onOpenCreateModal}
             onOpenThemeModal={handleOpenThemeModal}
           />
         </div>
       </header>
+
+      <MobileBottomNav 
+        isAuthenticated={isAuthenticated}
+        unreadNotificationsCount={unreadNotificationsCount}
+        unreadMessagesCount={unreadMessagesCount}
+        onOpenModal={onOpenCreateModal}
+      />
 
       <ThemePreviewModal
         isOpen={isThemeModalOpen}

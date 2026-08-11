@@ -1,13 +1,11 @@
 import type { MediaFileBase } from "./base";
+import type { BasicUserResponse } from "./user";
 
 export type NotificationType = 'like' | 'comment' | 'follow';
 
-export interface UserActor {
-  id: number;
-  name: string;
-  username: string;
-  avatar: MediaFileBase
-}
+export type UserActor = Pick<BasicUserResponse, 'id' | 'name' | 'username'> & {
+  avatar?: MediaFileBase | null;
+};
 
 export interface NotificationCreate {
   type: NotificationType;

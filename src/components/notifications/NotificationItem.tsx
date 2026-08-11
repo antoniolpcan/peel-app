@@ -2,7 +2,7 @@ import { memo } from 'react';
 import { Link } from 'react-router-dom';
 import { Heart, MessageCircle, UserPlus, Bell, ArrowRight } from 'lucide-react';
 import { UserAvatar } from '@/components/profile/UserAvatar';
-import type { NotificationResponse } from '@/services';
+import type { NotificationResponse } from '@/services/types';
 
 function formatNotificationDate(dateString: string): string {
   if (!dateString) return '';
@@ -58,7 +58,7 @@ export const NotificationItem = memo(function NotificationItem({
     }
   };
 
-  const actorName = notification.actor?.name || notification.actor?.username;
+  const actorName = notification.actor?.name || notification.actor?.username || 'Alguém';
 
   return (
     <div
@@ -71,17 +71,18 @@ export const NotificationItem = memo(function NotificationItem({
           onItemClick(notification.id, notification.is_read);
         }
       }}
-      className={`p-3.5 rounded-2xl border transition-all flex items-center justify-between cursor-pointer gap-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent ${
+      className={`p-3.5 rounded-2xl border transition-all flex items-center justify-between cursor-pointer gap-3 
+          sm:gap-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent ${
         isUnread
           ? 'bg-app-card border-app-accent/40 shadow-xs ring-1 ring-app-accent/10'
           : 'bg-app-card/40 border-app-border/60 hover:bg-app-card'
       }`}
     >
-      <div className="flex items-center gap-3 min-w-0">
+      <div className="flex items-center gap-3 min-w-0 grow">
         <div className="relative shrink-0">
           <UserAvatar
             name={actorName}
-            avatar={notification.actor?.avatar?.url}
+            avatar={notification.actor?.avatar}
             size="sm"
           />
           <div className="absolute -bottom-1 -right-1 p-1 rounded-full bg-app-card border border-app-border shadow-2xs">
@@ -89,14 +90,14 @@ export const NotificationItem = memo(function NotificationItem({
           </div>
         </div>
 
-        <div className="text-xs text-app-text leading-relaxed min-w-0 truncate">
+        <div className="text-xs text-app-text leading-relaxed min-w-0 line-clamp-2 wrap-break-word">
           <span className="font-bold">{actorName}</span>{' '}
           <span className="text-app-text/90">{renderText(notification.type)}</span>
         </div>
       </div>
 
-      <div className="flex items-center gap-3 shrink-0">
-        <span className="text-[11px] text-app-muted font-medium">
+      <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+        <span className="text-[11px] text-app-muted font-medium whitespace-nowrap">
           {formatNotificationDate(notification.created_at)}
         </span>
 
@@ -104,9 +105,11 @@ export const NotificationItem = memo(function NotificationItem({
           <Link
             to={`/perfil/${notification.actor.id}`}
             onClick={(e) => e.stopPropagation()}
-            className="text-[11px] font-semibold bg-app-bg hover:bg-app-accent/10 hover:text-app-accent text-app-text border border-app-border px-2.5 py-1 rounded-xl transition-all flex items-center gap-1 active:scale-95"
+            className="text-[11px] font-semibold bg-app-bg hover:bg-app-accent/10 hover:text-app-accent text-app-text 
+              border border-app-border px-2.5 py-1 rounded-xl transition-all flex items-center gap-1 active:scale-95 
+              whitespace-nowrap"
           >
-            <span>Ver perfil</span>
+            <span className="hidden sm:inline">Ver perfil</span>
             <ArrowRight className="w-3 h-3" />
           </Link>
         )}

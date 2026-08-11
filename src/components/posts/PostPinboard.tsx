@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from 'react';
+import { useEffect, useRef } from 'react';
 import { Loader2, SearchX, CheckCircle2, StickyNote } from 'lucide-react';
 import type { PostResponse } from '@/services/types';
 import { PostItGrid } from './PostItGrid';
@@ -29,23 +29,31 @@ export function PostPinboard({
   emptyMessage = 'Ainda não há nenhum post-it por aqui.',
   endOfListMessage = 'Você chegou ao fim do mural!',
 }: PostPinboardProps) {
-
-  const handleScroll = useCallback(() => {
-    if (loading || !hasMore) return;
-
-    const scrollThreshold = 300;
-    const isNearBottom = 
-      window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - scrollThreshold;
-
-    if (isNearBottom) {
-      onFetchMore();
-    }
-  }, [loading, hasMore, onFetchMore]);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [handleScroll]);
+    if (loading || !hasMore) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          onFetchMore();
+        }
+      },
+      { rootMargin: '300px' }
+    );
+
+    const currentSentinel = sentinelRef.current;
+    if (currentSentinel) {
+      observer.observe(currentSentinel);
+    }
+
+    return () => {
+      if (currentSentinel) {
+        observer.unobserve(currentSentinel);
+      }
+    };
+  }, [loading, hasMore, onFetchMore]);
 
   if (posts.length === 0 && loading) {
     return <PostItSkeleton count={6} />;
@@ -79,6 +87,8 @@ export function PostPinboard({
         handleDelete={onDelete}
         setSelectedPost={onSelectPost}
       />
+
+      <div ref={sentinelRef} className="h-1" />
 
       {loading && (
         <div className="flex justify-center items-center py-8">

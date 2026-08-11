@@ -1,11 +1,10 @@
 import { useState, useCallback, useRef, useEffect, memo } from 'react';
 import { Link } from 'react-router-dom';
-import type { BasicUserResponse } from '@/services/types';
+import type { BasicUserResponse, FollowerResponse } from '@/services/types';
 import { useUser } from '@/hooks/useUsers';
-import { useFollowStats, useFollowers } from '@/hooks/useFollows';
+import { useFollowStats, useFollowers, useFollowActions } from '@/hooks/useFollows';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/contexts/ToastContext';
-import { useFollowActions } from '@/hooks';
 
 import { UserAvatar } from './UserAvatar';
 import { UserHoverCard } from './UserHoverCard';
@@ -27,20 +26,17 @@ export const UserBadge = memo(function UserBadge({
   const [isHovered, setIsHovered] = useState(false);
   const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const { user: fetchedUser, loading: isUserLoading } = useUser(initialUser ? 0 : userId);
+  const { user: fetchedUser, loading: isUserLoading } = useUser(initialUser ? null : userId);
   const user = initialUser || fetchedUser;
 
-  const { stats, refetch: refetchStats } = useFollowStats(isHovered ? userId : 0);
-  const { followers, refetch: fetchFollowers } = useFollowers(isHovered ? userId : 0);
+  const { stats, refetchStats } = useFollowStats(isHovered ? userId : null);
+  const { followers, refetchFollowers } = useFollowers(isHovered ? userId : null);
   const { followUser, unfollowUser, loading: isFollowLoading } = useFollowActions();
 
   const isOwnProfile = userId === loggedUserId;
   
   const isFollowing = initialUser?.is_following ?? Boolean(
-    followers?.some((f) => {
-      const followerObj = 'follower' in f ? f.follower : null;
-      return f.follower_id === loggedUserId || followerObj?.id === loggedUserId;
-    })
+    followers?.some((f: FollowerResponse) => f.follower_id === loggedUserId || f.follower?.id === loggedUserId)
   );
 
   const handleMouseEnter = () => {
@@ -73,13 +69,13 @@ export const UserBadge = memo(function UserBadge({
 
     if (success) {
       refetchStats();
-      fetchFollowers();
+      refetchFollowers();
       addToast(
         isFollowing ? `Deixou de seguir ${user?.name}` : `Seguindo ${user?.name}!`,
         isFollowing ? 'info' : 'success'
       );
     }
-  }, [userId, isFollowing, unfollowUser, followUser, refetchStats, fetchFollowers, addToast, user?.name]);
+  }, [userId, isFollowing, unfollowUser, followUser, refetchStats, refetchFollowers, addToast, user?.name]);
 
   if ((isUserLoading && !user) || !user) {
     return (

@@ -1,14 +1,24 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, User, AtSign, Mail, Lock } from 'lucide-react';
+import { User, AtSign, Mail, Lock, Eye, EyeOff } from 'lucide-react';
+
 import { useUserActions } from '@/hooks/useUsers';
 import { useToast } from '@/contexts/ToastContext';
-import { AuthLayout } from '@/components/auth/AuthLayout';
+
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { ErrorMessage } from '@/components/ui/ErrorMessage';
+import logoSvg from '@/assets/logo.svg';
 
-export function Register() {
+interface RegisterFormProps {
+  isRegisterMode: boolean;
+  onToggleMode: (mode: 'login' | 'register') => void;
+  onSuccessRegister: (createdEmail: string) => void;
+}
+
+export function RegisterForm({ isRegisterMode, onToggleMode, onSuccessRegister }: RegisterFormProps) {
+  const { addToast } = useToast();
+  const { createUser, loading, error } = useUserActions();
+
   const [formData, setFormData] = useState({
     name: '',
     username: '',
@@ -17,21 +27,18 @@ export function Register() {
   });
   const [showPassword, setShowPassword] = useState(false);
 
-  const { createUser, loading, error } = useUserActions();
-  const navigate = useNavigate();
-  const { addToast } = useToast();
-
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    
-    const sanitizedValue = name === 'username' ? value.replace(/^@/, '') : value;
+    const sanitizedValue = name === 'username' 
+      ? value.replace(/^@/, '').replace(/\s+/g, '') 
+      : value;
 
     setFormData((prev) => ({ ...prev, [name]: sanitizedValue }));
   }, []);
 
   const passwordStrength = useMemo(() => {
     const pwd = formData.password;
-    if (!pwd) return { score: 0, label: '', color: '' };
+    if (!pwd) return { score: 0, label: '', color: '', text: '' };
 
     let score = 0;
     if (pwd.length >= 6) score++;
@@ -43,73 +50,83 @@ export function Register() {
     return { score: 3, label: 'Forte', color: 'bg-emerald-500', text: 'text-emerald-500' };
   }, [formData.password]);
 
-  const handleRegister = useCallback(
+  const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
-
-      if (!formData.name.trim() || !formData.email.trim() || !formData.password) return;
-
+      const cleanName = formData.name.trim();
+      const cleanEmail = formData.email.trim();
       const formattedUsername = formData.username.trim();
 
+      if (!cleanName || !cleanEmail || !formData.password) return;
+
       const newUser = await createUser({
-        name: formData.name.trim(),
-        email: formData.email.trim(),
+        name: cleanName,
+        email: cleanEmail,
         password: formData.password,
         username: formattedUsername !== '' ? formattedUsername : null,
       });
 
       if (newUser) {
-        addToast('Conta criada com sucesso! Faça login para continuar. ✨', 'success');
-        navigate('/login');
+        addToast('Conta criada com sucesso! Faça login para acessar.', 'success');
+        onSuccessRegister(cleanEmail);
       }
     },
-    [formData, createUser, addToast, navigate]
+    [formData, createUser, addToast, onSuccessRegister]
   );
 
   return (
-    <AuthLayout
-      title="Crie sua conta"
-      subtitle="Junte-se ao Peel e comece a colar suas ideias"
-      footerText="Já possui uma conta?"
-      footerLinkText="Fazer Login"
-      footerLinkTo="/login"
+    <div
+      className={`w-full md:w-1/2 p-6 sm:p-10 flex flex-col justify-center transition-all duration-500 ease-in-out ${
+        !isRegisterMode ? 'opacity-0 pointer-events-none hidden md:flex' : 'opacity-100'
+      }`}
     >
-      {error && <ErrorMessage message={error} className="mb-2" />}
+      <div className="mb-4">
+        <div className="flex items-center gap-2 mb-4 md:hidden">
+          <img src={logoSvg} alt="Logo Peel" className="w-8 h-8 object-contain" />
+          <span className="text-xl font-bold tracking-tight text-app-text">Peel</span>
+        </div>
 
-      <form onSubmit={handleRegister} className="flex flex-col gap-3.5">
+        <h1 className="text-2xl font-extrabold text-app-text tracking-tight mb-1">
+          Crie sua conta
+        </h1>
+        <p className="text-xs text-app-muted">
+          Junte-se ao Peel e comece a colar suas ideias.
+        </p>
+      </div>
+
+      {error && <ErrorMessage message={error} className="mb-3" />}
+
+      <form onSubmit={handleSubmit} className="flex flex-col gap-3">
         <div className="space-y-1">
-          <label htmlFor="register-name" className="text-xs font-semibold text-app-muted ml-1">
+          <label htmlFor="reg-name" className="text-xs font-semibold text-app-muted ml-1">
             Seu Nome
           </label>
           <div className="relative">
             <User className="w-4 h-4 text-app-muted absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
             <Input
-              id="register-name"
+              id="reg-name"
               name="name"
               type="text"
-              autoComplete="name"
               placeholder="Como quer ser chamado?"
               value={formData.name}
               onChange={handleChange}
               disabled={loading}
               className="pl-9"
               required
-              autoFocus
             />
           </div>
         </div>
 
         <div className="space-y-1">
-          <label htmlFor="register-username" className="text-xs font-semibold text-app-muted ml-1">
-            Nome de Usuário
+          <label htmlFor="reg-username" className="text-xs font-semibold text-app-muted ml-1">
+            Username
           </label>
           <div className="relative">
             <AtSign className="w-4 h-4 text-app-muted absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
             <Input
-              id="register-username"
+              id="reg-username"
               name="username"
               type="text"
-              autoComplete="username"
               placeholder="seu_username"
               value={formData.username}
               onChange={handleChange}
@@ -120,16 +137,15 @@ export function Register() {
         </div>
 
         <div className="space-y-1">
-          <label htmlFor="register-email" className="text-xs font-semibold text-app-muted ml-1">
+          <label htmlFor="reg-email" className="text-xs font-semibold text-app-muted ml-1">
             E-mail
           </label>
           <div className="relative">
             <Mail className="w-4 h-4 text-app-muted absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
             <Input
-              id="register-email"
+              id="reg-email"
               name="email"
               type="email"
-              autoComplete="email"
               placeholder="seu@email.com"
               value={formData.email}
               onChange={handleChange}
@@ -142,7 +158,7 @@ export function Register() {
 
         <div className="space-y-1">
           <div className="flex items-center justify-between px-1">
-            <label htmlFor="register-password" className="text-xs font-semibold text-app-muted">
+            <label htmlFor="reg-password" className="text-xs font-semibold text-app-muted">
               Senha
             </label>
             {passwordStrength.score > 0 && (
@@ -155,10 +171,9 @@ export function Register() {
           <div className="relative">
             <Lock className="w-4 h-4 text-app-muted absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
             <Input
-              id="register-password"
+              id="reg-password"
               name="password"
               type={showPassword ? 'text' : 'password'}
-              autoComplete="new-password"
               placeholder="Crie uma senha segura"
               value={formData.password}
               onChange={handleChange}
@@ -169,18 +184,12 @@ export function Register() {
             <button
               type="button"
               onClick={() => setShowPassword((prev) => !prev)}
-              disabled={loading}
-              tabIndex={-1}
-              aria-label={showPassword ? 'Ocultar senha' : 'Exibir senha'}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-app-muted hover:text-app-text transition-colors cursor-pointer disabled:opacity-50"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-app-muted hover:text-app-text cursor-pointer"
             >
-              {showPassword ? (
-                <EyeOff className="w-4 h-4 shrink-0" />
-              ) : (
-                <Eye className="w-4 h-4 shrink-0" />
-              )}
+              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
           </div>
+
           {formData.password.length > 0 && (
             <div className="flex gap-1 pt-1 px-1">
               {[1, 2, 3].map((step) => (
@@ -195,15 +204,23 @@ export function Register() {
           )}
         </div>
 
-        <Button 
-          type="submit" 
-          isLoading={loading} 
-          loadingText="Criando conta..."
-          className="mt-2"
-        >
+        <Button type="submit" isLoading={loading} loadingText="Criando conta..." className="mt-1">
           Criar minha conta
         </Button>
       </form>
-    </AuthLayout>
+
+      <div className="mt-4 text-center md:hidden">
+        <p className="text-xs text-app-muted">
+          Já possui uma conta?{' '}
+          <button
+            type="button"
+            onClick={() => onToggleMode('login')}
+            className="font-bold text-app-accent hover:underline cursor-pointer ml-1"
+          >
+            Fazer Login
+          </button>
+        </p>
+      </div>
+    </div>
   );
 }

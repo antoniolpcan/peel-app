@@ -1,9 +1,9 @@
-import { BASE_URL, apiFetch } from './apiClient';
+import { apiFetch } from './apiClient';
 import type { FollowCreate, FollowerResponse, FollowingResponse, FollowStatsResponse } from './types';
 
 export const followService = {
   followUser: async (data: FollowCreate): Promise<FollowerResponse> => {
-    return apiFetch<FollowerResponse>(`${BASE_URL}/follows/`, {
+    return apiFetch<FollowerResponse>('/follows/', {
       method: 'POST',
       body: data,
       auth: true,
@@ -11,21 +11,23 @@ export const followService = {
   },
 
   unfollowUser: async (userId: number): Promise<boolean> => {
-    return apiFetch<boolean>(`${BASE_URL}/follows/${userId}`, {
+    return apiFetch<boolean>(`/follows/${userId}`, {
       method: 'DELETE',
       auth: true,
     });
   },
 
-  getFollowers: async (userId: number): Promise<FollowerResponse[]> => {
-    return apiFetch<FollowerResponse[]>(`${BASE_URL}/follows/followers/${userId}`);
+  getFollowers: async (userId: number, skip = 0, limit = 50): Promise<FollowerResponse[]> => {
+    const params = new URLSearchParams({ skip: String(skip), limit: String(limit) });
+    return apiFetch<FollowerResponse[]>(`/follows/followers/${userId}?${params.toString()}`);
   },
 
-  getFollowing: async (userId: number): Promise<FollowingResponse[]> => {
-    return apiFetch<FollowingResponse[]>(`${BASE_URL}/follows/following/${userId}`);
+  getFollowing: async (userId: number, skip = 0, limit = 50): Promise<FollowingResponse[]> => {
+    const params = new URLSearchParams({ skip: String(skip), limit: String(limit) });
+    return apiFetch<FollowingResponse[]>(`/follows/following/${userId}?${params.toString()}`);
   },
 
   getFollowStats: async (userId: number): Promise<FollowStatsResponse> => {
-    return apiFetch<FollowStatsResponse>(`${BASE_URL}/follows/${userId}/stats`);
+    return apiFetch<FollowStatsResponse>(`/follows/${userId}/stats`);
   },
 };

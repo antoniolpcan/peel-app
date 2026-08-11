@@ -8,7 +8,15 @@ import { NotificationSkeleton } from '@/components/notifications/NotificationSke
 import { NotificationEmpty } from '@/components/notifications/NotificationEmpty';
 
 export function NotificationsPage() {
-  const { notifications, loading, error, markAsRead } = useNotifications();
+  const { 
+    notifications, 
+    unreadCount, 
+    loading, 
+    error, 
+    markAsRead, 
+    markAllAsRead 
+  } = useNotifications();
+
   const [filter, setFilter] = useState<NotificationFilter>('all');
 
   const filteredNotifications = useMemo(() => {
@@ -26,20 +34,29 @@ export function NotificationsPage() {
     },
     [markAsRead]
   );
+  
+  const isInitialLoading = loading && notifications.length === 0;
 
   return (
     <PageLayout>
       <div className="flex flex-col gap-6 max-w-2xl mx-auto w-full">
-        <NotificationHeader filter={filter} onFilterChange={setFilter} />
+        <NotificationHeader 
+          filter={filter} 
+          onFilterChange={setFilter} 
+          unreadCount={unreadCount}
+          onMarkAllAsRead={markAllAsRead}
+        />
+
         {error && (
           <div
             role="alert"
-            className="p-3.5 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-medium text-center"
+            className="p-3.5 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-medium text-center animate-in fade-in duration-200"
           >
             {error}
           </div>
         )}
-        {loading ? (
+
+        {isInitialLoading ? (
           <NotificationSkeleton />
         ) : filteredNotifications.length === 0 ? (
           <NotificationEmpty filter={filter} />

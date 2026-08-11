@@ -1,4 +1,4 @@
-import React, { useCallback, memo } from 'react';
+import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Navbar } from '../navbar/Navbar';
 
@@ -7,30 +7,19 @@ interface PageLayoutProps {
   onOpenCreateModal?: () => void;
 }
 
-const NOOP = () => {};
-
-export const PageLayout = memo(function PageLayout({ 
-  children, 
-  onOpenCreateModal 
-}: PageLayoutProps) {
+export function PageLayout({ children, onOpenCreateModal }: PageLayoutProps) {
   const { logout, isAuthenticated } = useAuth();
-
-  const handleOpenModal = useCallback(() => {
-    if (onOpenCreateModal) {
-      onOpenCreateModal();
-    }
-  }, [onOpenCreateModal]);
 
   return (
     <div className="min-h-screen bg-app-bg text-app-text transition-colors duration-200">
       <Navbar
         isAuthenticated={isAuthenticated}
         logout={logout}
-        setIsModalOpen={onOpenCreateModal ? handleOpenModal : NOOP}
+        onOpenCreateModal={onOpenCreateModal}
       />
-      <main className="max-w-6xl mx-auto py-10 px-8 flex flex-col gap-10">
+      <main className="max-w-6xl mx-auto px-4 py-6 sm:px-8 sm:py-10 pb-24 md:pb-10 flex flex-col gap-6 sm:gap-10">
         {children}
       </main>
     </div>
   );
-});
+}

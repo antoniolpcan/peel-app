@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { Loader2, SearchX } from 'lucide-react';
 
@@ -8,7 +8,7 @@ import { usePosts } from '@/hooks/usePosts';
 import { useColors } from '@/hooks/useColors';
 import { useProfileEdit } from '@/hooks/useProfileEdit';
 import { useProfileFollow } from '@/hooks/useProfileFollow';
-import { useFollowing } from '@/hooks';
+import { useFollowing } from '@/hooks/useFollows';
 
 import { PageLayout } from '@/components/layout/PageLayout';
 import { PostPinboard } from '@/components/posts/PostPinboard';
@@ -26,13 +26,13 @@ export function Profile() {
   const { loggedUserId, isAuthenticated } = useAuth();
   const { id: paramId } = useParams();
 
-  const profileUserId = paramId ? Number(paramId) : (loggedUserId || 0);
-  const isOwnProfile = profileUserId === loggedUserId;
+  const profileUserId = paramId ? Number(paramId) : (loggedUserId || null);
+  const isOwnProfile = Boolean(loggedUserId && profileUserId === loggedUserId);
 
   const { user, loading: isFetching, refetch: refetchUser } = useUser(profileUserId);
   const { colors } = useColors();
 
-  const { following: myFollowing, refetch: refetchMyFollowing } = useFollowing(loggedUserId || 0);
+  const { following: myFollowing, refetchFollowing: refetchMyFollowing } = useFollowing(loggedUserId);
 
   const { 
     posts, 
@@ -48,30 +48,14 @@ export function Profile() {
     user_id: profileUserId || undefined,
   });
 
-  const follow = useProfileFollow(profileUserId, loggedUserId, isOwnProfile, user?.name);
+  const follow = useProfileFollow(profileUserId || 0, loggedUserId, isOwnProfile, user?.name);
   const edit = useProfileEdit(user, refetchUser);
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [selectedColorId, setSelectedColorId] = useState<number | null>(null);
 
-  useEffect(() => {
-    if (profileUserId) {
-      fetchPosts();
-      follow.refetchStats();
-      follow.refetchFollowers();
-      if (refetchMyFollowing) {
-        refetchMyFollowing();
-      }
-    }
-  }, [profileUserId]);
-
-  const handleOpenCreateModal = useCallback(() => {
-    setIsCreateModalOpen(true);
-  }, []);
-
-  const handleCloseCreateModal = useCallback(() => {
-    setIsCreateModalOpen(false);
-  }, []);
+  const handleOpenCreateModal = useCallback(() => setIsCreateModalOpen(true), []);
+  const handleCloseCreateModal = useCallback(() => setIsCreateModalOpen(false), []);
 
   const handleSuccessCreateModal = useCallback(() => {
     fetchPosts();
@@ -107,9 +91,18 @@ export function Profile() {
     return posts.filter((post) => post.color_id === selectedColorId);
   }, [posts, selectedColorId]);
 
-  const currentFollowUsers = useMemo(() => {
-    const list = follow.followModalType === 'followers' ? follow.followers : follow.following;
-    return (list || []) as unknown as BasicUserResponse[];
+  const currentFollowUsers = useMemo((): BasicUserResponse[] => {
+    if (follow.followModalType === 'followers') {
+      return (follow.followers || [])
+        .map((f) => f.follower)
+        .filter((u): u is BasicUserResponse => Boolean(u));
+    }
+    if (follow.followModalType === 'following') {
+      return (follow.following || [])
+        .map((f) => f.following)
+        .filter((u): u is BasicUserResponse => Boolean(u));
+    }
+    return [];
   }, [follow.followModalType, follow.followers, follow.following]);
 
   if (isFetching) {

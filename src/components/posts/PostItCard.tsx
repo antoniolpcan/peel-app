@@ -3,13 +3,13 @@ import type { PostResponse } from '@/services/types';
 import { useAuth } from '@/contexts/AuthContext';
 import { formatRelativeDate } from '@/utils/formatDate';
 import { LikeButton } from '@/components/ui/LikeButton';
-import { DeleteButton } from '@/components/ui/DeleteButton';
 import { UserBadge } from '../profile/UserBadge';
+import { DeleteButton } from '../ui/DeleteButton';
 
 interface PostItCardProps {
   post: PostResponse;
   rotateClass?: string;
-  onClick: () => void;
+  onSelect: (post: PostResponse) => void;
   onLike: (e: React.MouseEvent, id: number) => void;
   onDelete: (e: React.MouseEvent, id: number) => void;
   showTape?: boolean;
@@ -18,14 +18,14 @@ interface PostItCardProps {
 export const PostItCard = memo(function PostItCard({
   post,
   rotateClass = '',
-  onClick,
+  onSelect,
   onLike,
   onDelete,
   showTape = true,
 }: PostItCardProps) {
   const { loggedUserId } = useAuth();
   const [isDeleting, setIsDeleting] = useState(false);
-  const timeoutRef = useRef<number | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const isOwner = loggedUserId === post.user_id;
   const backgroundColor = post.color?.hex_code || '#FEF08A';
@@ -38,24 +38,48 @@ export const PostItCard = memo(function PostItCard({
     };
   }, []);
 
-  const handleDeleteClick = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    setIsDeleting(true);
+  const handleClick = useCallback(() => {
+    onSelect(post);
+  }, [onSelect, post]);
 
-    timeoutRef.current = setTimeout(() => {
-      onDelete(e, post.id);
-    }, 400);
-  }, [post.id, onDelete]);
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        onSelect(post);
+      }
+    },
+    [onSelect, post]
+  );
 
-  const handleLikeClick = useCallback((e: React.MouseEvent) => {
-    onLike(e, post.id);
-  }, [post.id, onLike]);
+  const handleDeleteClick = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      setIsDeleting(true);
+
+      timeoutRef.current = setTimeout(() => {
+        onDelete(e, post.id);
+      }, 400);
+    },
+    [post.id, onDelete]
+  );
+
+  const handleLikeClick = useCallback(
+    (e: React.MouseEvent) => {
+      onLike(e, post.id);
+    },
+    [post.id, onLike]
+  );
 
   return (
-    <div
-      onClick={onClick}
+    <article
+      tabIndex={0}
+      role="button"
+      aria-label={`Post-it: ${post.title}`}
+      onClick={handleClick}
+      onKeyDown={handleKeyDown}
       className={`rounded-2xl p-6 shadow-md border border-black/10 flex flex-col min-h-62.5 relative cursor-pointer 
-        transition-all duration-300 hover:rotate-0 hover:scale-105 hover:shadow-2xl hover:z-20 ${rotateClass} ${
+        transition-all duration-300 hover:rotate-0 hover:scale-105 hover:shadow-2xl hover:z-20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/40 ${rotateClass} ${
         isDeleting ? 'animate-peel pointer-events-none' : ''
       }`}
       style={{ 
@@ -91,6 +115,6 @@ export const PostItCard = memo(function PostItCard({
           )}
         </div>
       </div>
-    </div>
+    </article>
   );
 });

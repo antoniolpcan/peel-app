@@ -18,10 +18,6 @@ export function PostItGrid({
   setSelectedPost 
 }: PostItGridProps) {
 
-  const handleSelect = useCallback((post: PostResponse) => {
-    setSelectedPost(post);
-  }, [setSelectedPost]);
-
   const handleLikeClick = useCallback((e: React.MouseEvent, id: number) => {
     e.stopPropagation();
     handleLike(id);
@@ -51,7 +47,7 @@ export function PostItGrid({
           key={post.id}
           post={post}
           rotateClass={ROTATIONS[index % ROTATIONS.length]}
-          onClick={() => handleSelect(post)}
+          onSelect={setSelectedPost}
           onLike={handleLikeClick}
           onDelete={handleDeleteClick}
         />

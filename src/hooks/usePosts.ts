@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useState, useRef } from 'react';
+import { useCallback, useEffect, useState, useRef, useMemo } from 'react';
 import { postService } from '@/services/postService';
 import type { CommentResponse, GetPostsParams, PostBase, PostResponse, PostUpdate } from '@/services/types';
+import { parseApiError } from '@/utils/errorParser';
 
 const LIMIT = 12;
 
@@ -19,53 +20,47 @@ export function usePosts(params: UsePostsParams = {}) {
 
   const skipRef = useRef(0);
   const activeRequestRef = useRef(0);
-  const paramsKey = JSON.stringify(params);
 
-  const fetchFromService = useCallback(async (queryParams: GetPostsParams): Promise<PostResponse[]> => {
-    const isFollowing = params.feedType === 'following' || params.followingOnly;
-
-    if (isFollowing && 'getFollowingPosts' in postService && typeof (postService as any).getFollowingPosts === 'function') {
-      return await (postService as any).getFollowingPosts(queryParams);
-    }
-
-    return await postService.getPosts(queryParams);
-  }, [paramsKey]);
+  const paramsSerialized = useMemo(() => JSON.stringify(params), [params]);
 
   const fetchPosts = useCallback(async () => {
     const currentRequestId = ++activeRequestRef.current;
+    const currentParams: UsePostsParams = JSON.parse(paramsSerialized);
 
     try {
       setLoading(true);
       setError(null);
       skipRef.current = 0;
 
-      const initialParams = { ...params, skip: 0, limit: LIMIT };
-      const data = await fetchFromService(initialParams);
+      const initialParams = { ...currentParams, skip: 0, limit: LIMIT };
+      const data = await postService.getPosts(initialParams);
 
       if (currentRequestId === activeRequestRef.current) {
         setPosts(data);
         setHasMore(data.length === LIMIT);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       if (currentRequestId === activeRequestRef.current) {
-        setError(err.message || 'Erro ao carregar posts');
+        setError(parseApiError(err) || 'Erro ao carregar posts');
       }
     } finally {
       if (currentRequestId === activeRequestRef.current) {
         setLoading(false);
       }
     }
-  }, [paramsKey, fetchFromService]);
+  }, [paramsSerialized]);
 
   const fetchMorePosts = useCallback(async () => {
     if (loading || loadingMore || !hasMore) return;
 
+    const currentParams: UsePostsParams = JSON.parse(paramsSerialized);
+
     try {
       setLoadingMore(true);
       const nextSkip = skipRef.current + LIMIT;
-      const nextParams = { ...params, skip: nextSkip, limit: LIMIT };
+      const nextParams = { ...currentParams, skip: nextSkip, limit: LIMIT };
 
-      const newPosts = await fetchFromService(nextParams);
+      const newPosts = await postService.getPosts(nextParams);
 
       if (newPosts.length > 0) {
         setPosts((prev) => {
@@ -77,11 +72,11 @@ export function usePosts(params: UsePostsParams = {}) {
       }
 
       setHasMore(newPosts.length === LIMIT);
-    } catch (err: any) {
+    } catch {
     } finally {
       setLoadingMore(false);
     }
-  }, [paramsKey, loading, loadingMore, hasMore, fetchFromService]);
+  }, [paramsSerialized, loading, loadingMore, hasMore]);
 
   const handleLike = useCallback(async (postId: number) => {
     let previousPosts: PostResponse[] = [];
@@ -109,7 +104,7 @@ export function usePosts(params: UsePostsParams = {}) {
         setSelectedPost((prev) => (prev?.id === postId ? updatedPost : prev));
       }
       return updatedPost;
-    } catch (err) {
+    } catch {
       setPosts(previousPosts);
       return null;
     }
@@ -121,7 +116,7 @@ export function usePosts(params: UsePostsParams = {}) {
       setPosts((prev) => prev.filter((p) => p.id !== postId));
       setSelectedPost((prev) => (prev?.id === postId ? null : prev));
       return true;
-    } catch (err) {
+    } catch {
       return false;
     }
   }, []);
@@ -155,8 +150,8 @@ export function usePostActions() {
       setLoading(true);
       setError(null);
       return await postService.createPost(data);
-    } catch (err: any) {
-      setError(err.message || 'Erro ao criar post');
+    } catch (err: unknown) {
+      setError(parseApiError(err) || 'Erro ao criar post');
       return null;
     } finally {
       setLoading(false);
@@ -168,8 +163,8 @@ export function usePostActions() {
       setLoading(true);
       setError(null);
       return await postService.updatePost(postId, data);
-    } catch (err: any) {
-      setError(err.message || 'Erro ao atualizar post');
+    } catch (err: unknown) {
+      setError(parseApiError(err) || 'Erro ao atualizar post');
       return null;
     } finally {
       setLoading(false);
@@ -182,8 +177,8 @@ export function usePostActions() {
       setError(null);
       await postService.deletePost(postId);
       return true;
-    } catch (err: any) {
-      setError(err.message || 'Erro ao deletar post');
+    } catch (err: unknown) {
+      setError(parseApiError(err) || 'Erro ao deletar post');
       return false;
     } finally {
       setLoading(false);
@@ -194,8 +189,8 @@ export function usePostActions() {
     try {
       setError(null);
       return await postService.likePost(postId);
-    } catch (err: any) {
-      setError(err.message || 'Erro ao curtir post');
+    } catch (err: unknown) {
+      setError(parseApiError(err) || 'Erro ao curtir post');
       return null;
     }
   }, []);
@@ -203,7 +198,7 @@ export function usePostActions() {
   return { createPost, updatePost, deletePost, likePost, loading, error };
 }
 
-export function useComments(postId: number) {
+export function useComments(postId: number | null | undefined) {
   const [comments, setComments] = useState<CommentResponse[]>([]);
   const [loading, setLoading] = useState(Boolean(postId));
   const [submitting, setSubmitting] = useState(false);
@@ -211,20 +206,20 @@ export function useComments(postId: number) {
 
   const fetchComments = useCallback(async () => {
     if (!postId) {
+      setComments([]);
       setLoading(false);
       return;
     }
 
-    let isMounted = true;
     try {
       setLoading(true);
       setError(null);
       const data = await postService.getComments(postId);
-      if (isMounted) setComments(data);
-    } catch (err: any) {
-      if (isMounted) setError(err.message || 'Erro ao carregar comentários');
+      setComments(data);
+    } catch (err: unknown) {
+      setError(parseApiError(err) || 'Erro ao carregar comentários');
     } finally {
-      if (isMounted) setLoading(false);
+      setLoading(false);
     }
   }, [postId]);
 
@@ -232,21 +227,24 @@ export function useComments(postId: number) {
     fetchComments();
   }, [fetchComments]);
 
-  const createComment = useCallback(async (content: string) => {
-    if (!content.trim() || submitting) return null;
+  const createComment = useCallback(
+    async (content: string) => {
+      if (!postId || !content.trim() || submitting) return null;
 
-    try {
-      setSubmitting(true);
-      const newComment = await postService.createComment(postId, content);
-      setComments((prev) => [...prev, newComment]);
-      return newComment;
-    } catch (err: any) {
-      setError(err.message || 'Erro ao enviar comentário');
-      return null;
-    } finally {
-      setSubmitting(false);
-    }
-  }, [postId, submitting]);
+      try {
+        setSubmitting(true);
+        const newComment = await postService.createComment(postId, content);
+        setComments((prev) => [...prev, newComment]);
+        return newComment;
+      } catch (err: unknown) {
+        setError(parseApiError(err) || 'Erro ao enviar comentário');
+        return null;
+      } finally {
+        setSubmitting(false);
+      }
+    },
+    [postId, submitting]
+  );
 
   return { comments, loading, submitting, error, createComment, refetch: fetchComments };
 }
