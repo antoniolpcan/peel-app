@@ -1,3 +1,4 @@
+import { authService } from '@/services';
 import { createContext, useContext, useEffect, useState, useCallback, useMemo, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -41,48 +42,40 @@ function getUserIdFromToken(token: string | null): number | null {
   return isNaN(parsedId) ? null : parsedId;
 }
 
-function isTokenValid(token: string | null): boolean {
-  if (!token) return false;
-  const decoded = parseJwtPayload(token);
-  if (!decoded) return false;
-
-  if (decoded.exp) {
-    const currentTime = Math.floor(Date.now() / 1000);
-    return decoded.exp > currentTime;
-  }
-
-  return true;
-}
-
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
-    const token = localStorage.getItem('@peel:token');
-    if (token && !isTokenValid(token)) {
-      localStorage.removeItem('@peel:token');
-      return false;
-    }
-    return !!token;
+    return localStorage.getItem('@peel:isAuthenticated') === 'true';
   });
 
   const [loggedUserId, setLoggedUserId] = useState<number | null>(() => {
-    const token = localStorage.getItem('@peel:token');
-    return isTokenValid(token) ? getUserIdFromToken(token) : null;
+    const id = localStorage.getItem('@peel:userId');
+    return id ? Number(id) : null;
   });
 
   const navigate = useNavigate();
 
   const login = useCallback((token: string) => {
-    localStorage.setItem('@peel:token', token);
-    setIsAuthenticated(true);
-    setLoggedUserId(getUserIdFromToken(token));
-    navigate('/');
+    const userId = getUserIdFromToken(token);
+    
+    if (userId) {
+      localStorage.setItem('@peel:isAuthenticated', 'true');
+      localStorage.setItem('@peel:userId', String(userId));
+      setIsAuthenticated(true);
+      setLoggedUserId(userId);
+      navigate('/');
+    }
   }, [navigate]);
 
-  const logout = useCallback(() => {
-    localStorage.removeItem('@peel:token');
-    setIsAuthenticated(false);
-    setLoggedUserId(null);
-    navigate('/auth');
+  const logout = useCallback(async () => {
+    try {
+      await authService.logout();
+    } catch (error) {} finally {
+      localStorage.removeItem('@peel:isAuthenticated');
+      localStorage.removeItem('@peel:userId');
+      setIsAuthenticated(false);
+      setLoggedUserId(null);
+      navigate('/auth');
+    }
   }, [navigate]);
 
   useEffect(() => {

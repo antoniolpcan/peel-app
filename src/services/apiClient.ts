@@ -7,17 +7,8 @@ interface FastAPIErrorDetail {
   loc?: (string | number)[];
 }
 
-export function getHeaders(isAuthenticated = false): HeadersInit {
-  const headers: Record<string, string> = {};
-
-  if (isAuthenticated) {
-    const token = localStorage.getItem('@peel:token');
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-  }
-
-  return headers;
+export function getHeaders(): HeadersInit {
+  return {}; 
 }
 
 export async function handleResponse<T>(response: Response): Promise<T> {
@@ -63,16 +54,15 @@ export async function handleResponse<T>(response: Response): Promise<T> {
 
 export interface ApiFetchOptions extends Omit<RequestInit, 'body'> {
   body?: Record<string, any> | BodyInit | null;
-  auth?: boolean;
 }
 
 export async function apiFetch<T>(
   input: RequestInfo | URL,
   init: ApiFetchOptions = {}
 ): Promise<T> {
-  const { auth = false, headers: customHeaders, body, ...customConfig } = init;
+  const { headers: customHeaders, body, ...customConfig } = init;
 
-  const headers = new Headers(getHeaders(auth));
+  const headers = new Headers(getHeaders());
 
   if (customHeaders) {
     new Headers(customHeaders).forEach((value, key) => {
@@ -107,6 +97,7 @@ export async function apiFetch<T>(
     ...customConfig,
     headers,
     body: formattedBody,
+    credentials: 'include',
   };
 
   try {

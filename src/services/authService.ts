@@ -29,4 +29,11 @@ export const authService = {
       },
     });
   },
+
+  logout: async (): Promise<{ message: string }> => {
+    return apiFetch<{ message: string }>('/auth/logout', {
+      method: 'POST',
+    });
+  },
+  
 };
