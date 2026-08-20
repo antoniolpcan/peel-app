@@ -1,20 +1,20 @@
 import type { BasicUserResponse } from "./user";
 
 export interface FollowCreate {
-  following_id: number;
+  following_id: string;
 }
 
 export interface FollowerResponse {
-  id: number;
-  follower_id: number;
-  following_id: number;
+  id: string;
+  follower_id: string;
+  following_id: string;
   follower?: BasicUserResponse | null;
 }
 
 export interface FollowingResponse {
-  id: number;
-  follower_id: number;
-  following_id: number;
+  id: string;
+  follower_id: string;
+  following_id: string;
   following?: BasicUserResponse | null;
 }
 

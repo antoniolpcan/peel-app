@@ -1,13 +1,13 @@
 import type { BasicUserResponse } from "./user";
 
 export interface ChatMemberResponse {
-  user_id: number;
+  user_id: string;
   joined_at: string;
   user?: BasicUserResponse | null;
 }
 
 export interface ChatResponse {
-  id: number;
+  id: string;
   created_at: string;
   members?: ChatMemberResponse[];
 }
@@ -17,9 +17,9 @@ export interface MessageCreate {
 }
 
 export interface MessageResponse {
-  id: number;
-  chat_id: number;
-  sender_id: number;
+  id: string;
+  chat_id: string;
+  sender_id: string;
   content: string;
   is_read: boolean;
   created_at: string;

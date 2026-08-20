@@ -6,28 +6,26 @@ export const followService = {
     return apiFetch<FollowerResponse>('/follows/', {
       method: 'POST',
       body: data,
-      auth: true,
     });
   },
 
-  unfollowUser: async (userId: number): Promise<boolean> => {
+  unfollowUser: async (userId: string): Promise<boolean> => {
     return apiFetch<boolean>(`/follows/${userId}`, {
       method: 'DELETE',
-      auth: true,
     });
   },
 
-  getFollowers: async (userId: number, skip = 0, limit = 50): Promise<FollowerResponse[]> => {
+  getFollowers: async (userId: string, skip = 0, limit = 50): Promise<FollowerResponse[]> => {
     const params = new URLSearchParams({ skip: String(skip), limit: String(limit) });
     return apiFetch<FollowerResponse[]>(`/follows/followers/${userId}?${params.toString()}`);
   },
 
-  getFollowing: async (userId: number, skip = 0, limit = 50): Promise<FollowingResponse[]> => {
+  getFollowing: async (userId: string, skip = 0, limit = 50): Promise<FollowingResponse[]> => {
     const params = new URLSearchParams({ skip: String(skip), limit: String(limit) });
     return apiFetch<FollowingResponse[]>(`/follows/following/${userId}?${params.toString()}`);
   },
 
-  getFollowStats: async (userId: number): Promise<FollowStatsResponse> => {
+  getFollowStats: async (userId: string): Promise<FollowStatsResponse> => {
     return apiFetch<FollowStatsResponse>(`/follows/${userId}/stats`);
   },
 };

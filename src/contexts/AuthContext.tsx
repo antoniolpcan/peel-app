@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 
 interface AuthContextData {
   isAuthenticated: boolean;
-  loggedUserId: number | null;
+  loggedUserId: string | null;
   login: (token: string) => void;
   logout: () => void;
 }
@@ -31,15 +31,14 @@ function parseJwtPayload(token: string): Record<string, any> | null {
   }
 }
 
-function getUserIdFromToken(token: string | null): number | null {
+function getUserIdFromToken(token: string | null): string | null {
   if (!token) return null;
   const decoded = parseJwtPayload(token);
   if (!decoded) return null;
 
-  const rawId = decoded.sub ?? decoded.id;
-  const parsedId = Number(rawId);
-
-  return isNaN(parsedId) ? null : parsedId;
+  const rawId = decoded.sub;
+  
+  return rawId;
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -47,9 +46,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return localStorage.getItem('@peel:isAuthenticated') === 'true';
   });
 
-  const [loggedUserId, setLoggedUserId] = useState<number | null>(() => {
+  const [loggedUserId, setLoggedUserId] = useState<string | null>(() => {
     const id = localStorage.getItem('@peel:userId');
-    return id ? Number(id) : null;
+    return id ? String(id) : null;
   });
 
   const navigate = useNavigate();
@@ -61,7 +60,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.setItem('@peel:isAuthenticated', 'true');
       localStorage.setItem('@peel:userId', String(userId));
       setIsAuthenticated(true);
-      setLoggedUserId(userId);
+      setLoggedUserId(String(userId));
       navigate('/');
     }
   }, [navigate]);

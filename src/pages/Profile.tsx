@@ -26,7 +26,7 @@ export function Profile() {
   const { loggedUserId, isAuthenticated } = useAuth();
   const { id: paramId } = useParams();
 
-  const profileUserId = paramId ? Number(paramId) : (loggedUserId || null);
+  const profileUserId = paramId ? String(paramId) : (loggedUserId || null);
   const isOwnProfile = Boolean(loggedUserId && profileUserId === loggedUserId);
 
   const { user, loading: isFetching, refetch: refetchUser } = useUser(profileUserId);
@@ -48,11 +48,11 @@ export function Profile() {
     user_id: profileUserId || undefined,
   });
 
-  const follow = useProfileFollow(profileUserId || 0, loggedUserId, isOwnProfile, user?.name);
+  const follow = useProfileFollow(profileUserId || "", loggedUserId, isOwnProfile, user?.name);
   const edit = useProfileEdit(user, refetchUser);
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [selectedColorId, setSelectedColorId] = useState<number | null>(null);
+  const [selectedColorId, setSelectedColorId] = useState<string | null>(null);
 
   const handleOpenCreateModal = useCallback(() => setIsCreateModalOpen(true), []);
   const handleCloseCreateModal = useCallback(() => setIsCreateModalOpen(false), []);
@@ -74,7 +74,7 @@ export function Profile() {
     edit.setTempImageSrc(null);
   }, [edit]);
 
-  const handleModalFollowToggle = useCallback((toggledUserId: number) => {
+  const handleModalFollowToggle = useCallback((toggledUserId: string) => {
     follow.refetchStats();
     
     if (refetchMyFollowing) {

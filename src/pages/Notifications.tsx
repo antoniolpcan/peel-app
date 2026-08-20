@@ -27,7 +27,7 @@ export function NotificationsPage() {
   }, [notifications, filter]);
 
   const handleItemClick = useCallback(
-    (id: number, isRead: boolean) => {
+    (id: string, isRead: boolean) => {
       if (!isRead) {
         markAsRead(id);
       }

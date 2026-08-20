@@ -25,7 +25,7 @@ export const useNotifications = (autoFetch = true) => {
     }
   }, []);
 
-  const markAsRead = useCallback(async (notificationId: number) => {
+  const markAsRead = useCallback(async (notificationId: string) => {
     setNotifications((prev) =>
       prev.map((n) => (n.id === notificationId ? { ...n, is_read: true } : n))
     );
@@ -100,10 +100,7 @@ export const useNotifications = (autoFetch = true) => {
 
     return () => {
       isComponentMounted = false;
-      if (
-        ws.readyState === WebSocket.OPEN ||
-        ws.readyState === WebSocket.CONNECTING
-      ) {
+      if (ws.readyState === WebSocket.OPEN) {
         ws.close();
       }
       socketRef.current = null;

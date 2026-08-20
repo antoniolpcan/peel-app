@@ -28,7 +28,7 @@ export function useUsers(skip = 0, limit = 100) {
   return { users, loading, error, refetch: fetchUsers };
 }
 
-export function useUser(userId: number | null | undefined) {
+export function useUser(userId: string | null | undefined) {
   const [user, setUser] = useState<BasicUserResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(Boolean(userId));
   const [error, setError] = useState<string | null>(null);

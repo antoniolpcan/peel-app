@@ -1,10 +1,10 @@
 import type { BasicUserResponse } from "./user";
 
 export interface CommentResponse {
-  id: number;
+  id: string;
   content: string;
-  post_id: number;
-  user_id: number;
+  post_id: string;
+  user_id: string;
   user: BasicUserResponse;
   created_at: string;
 }

@@ -14,15 +14,14 @@ export const userService = {
     return apiFetch<BasicUserResponse[]>(`/users?${params.toString()}`);
   },
 
-  getUserById: async (userId: number): Promise<BasicUserResponse> => {
+  getUserById: async (userId: string): Promise<BasicUserResponse> => {
     return apiFetch<BasicUserResponse>(`/users/${userId}`);
   },
 
   updateMe: async (data: UserUpdate): Promise<UserResponse> => {
     return apiFetch<UserResponse>('/users/me', {
       method: 'PATCH',
-      body: data,
-      auth: true,
+      body: data
     });
   },
 };

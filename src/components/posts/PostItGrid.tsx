@@ -4,8 +4,8 @@ import { PostItCard } from './PostItCard';
 
 interface PostItGridProps {
   posts: PostResponse[];
-  handleLike: (id: number) => Promise<PostResponse | null>;
-  handleDelete: (id: number) => Promise<boolean>;
+  handleLike: (id: string) => Promise<PostResponse | null>;
+  handleDelete: (id: string) => Promise<boolean>;
   setSelectedPost: (value: PostResponse | null) => void;
 }
 
@@ -18,12 +18,12 @@ export function PostItGrid({
   setSelectedPost 
 }: PostItGridProps) {
 
-  const handleLikeClick = useCallback((e: React.MouseEvent, id: number) => {
+  const handleLikeClick = useCallback((e: React.MouseEvent, id: string) => {
     e.stopPropagation();
     handleLike(id);
   }, [handleLike]);
 
-  const handleDeleteClick = useCallback((e: React.MouseEvent, id: number) => {
+  const handleDeleteClick = useCallback((e: React.MouseEvent, id: string) => {
     e.stopPropagation();
     handleDelete(id);
   }, [handleDelete]);

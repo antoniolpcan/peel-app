@@ -6,7 +6,7 @@ export const colorService = {
     return apiFetch<ColorResponse[]>('/colors');
   },
 
-  getColorById: async (colorId: number): Promise<ColorResponse> => {
+  getColorById: async (colorId: string): Promise<ColorResponse> => {
     return apiFetch<ColorResponse>(`/colors/${colorId}`);
   },
 };

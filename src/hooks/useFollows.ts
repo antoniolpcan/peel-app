@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { followService } from '@/services/followService';
 import type { FollowerResponse, FollowingResponse, FollowStatsResponse } from '@/services/types';
 
-export function useFollowers(userId: number | null | undefined, skip = 0, limit = 50) {
+export function useFollowers(userId: string | null | undefined, skip = 0, limit = 50) {
   const [followers, setFollowers] = useState<FollowerResponse[]>([]);
   const [loading, setLoading] = useState<boolean>(Boolean(userId));
   const [error, setError] = useState<string | null>(null);
@@ -40,7 +40,7 @@ export function useFollowers(userId: number | null | undefined, skip = 0, limit 
   };
 }
 
-export function useFollowStats(userId: number | null | undefined) {
+export function useFollowStats(userId: string | null | undefined) {
   const [stats, setStats] = useState<FollowStatsResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(Boolean(userId));
   const [error, setError] = useState<string | null>(null);
@@ -78,7 +78,7 @@ export function useFollowStats(userId: number | null | undefined) {
   };
 }
 
-export function useFollowing(userId: number | null | undefined, skip = 0, limit = 50) {
+export function useFollowing(userId: string | null | undefined, skip = 0, limit = 50) {
   const [following, setFollowing] = useState<FollowingResponse[]>([]);
   const [loading, setLoading] = useState<boolean>(Boolean(userId));
   const [error, setError] = useState<string | null>(null);
@@ -120,7 +120,7 @@ export function useFollowActions() {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  const followUser = useCallback(async (userId: number): Promise<FollowerResponse | null> => {
+  const followUser = useCallback(async (userId: string): Promise<FollowerResponse | null> => {
     try {
       setLoading(true);
       setError(null);
@@ -134,7 +134,7 @@ export function useFollowActions() {
     }
   }, []);
 
-  const unfollowUser = useCallback(async (userId: number): Promise<boolean> => {
+  const unfollowUser = useCallback(async (userId: string): Promise<boolean> => {
     try {
       setLoading(true);
       setError(null);

@@ -78,7 +78,7 @@ export function usePosts(params: UsePostsParams = {}) {
     }
   }, [paramsSerialized, loading, loadingMore, hasMore]);
 
-  const handleLike = useCallback(async (postId: number) => {
+  const handleLike = useCallback(async (postId: string) => {
     let previousPosts: PostResponse[] = [];
 
     setPosts((prev) => {
@@ -110,7 +110,7 @@ export function usePosts(params: UsePostsParams = {}) {
     }
   }, []);
 
-  const handleDelete = useCallback(async (postId: number) => {
+  const handleDelete = useCallback(async (postId: string) => {
     try {
       await postService.deletePost(postId);
       setPosts((prev) => prev.filter((p) => p.id !== postId));
@@ -158,7 +158,7 @@ export function usePostActions() {
     }
   }, []);
 
-  const updatePost = useCallback(async (postId: number, data: PostUpdate) => {
+  const updatePost = useCallback(async (postId: string, data: PostUpdate) => {
     try {
       setLoading(true);
       setError(null);
@@ -171,7 +171,7 @@ export function usePostActions() {
     }
   }, []);
 
-  const deletePost = useCallback(async (postId: number) => {
+  const deletePost = useCallback(async (postId: string) => {
     try {
       setLoading(true);
       setError(null);
@@ -185,7 +185,7 @@ export function usePostActions() {
     }
   }, []);
 
-  const likePost = useCallback(async (postId: number) => {
+  const likePost = useCallback(async (postId: string) => {
     try {
       setError(null);
       return await postService.likePost(postId);
@@ -198,7 +198,7 @@ export function usePostActions() {
   return { createPost, updatePost, deletePost, likePost, loading, error };
 }
 
-export function useComments(postId: number | null | undefined) {
+export function useComments(postId: string | null | undefined) {
   const [comments, setComments] = useState<CommentResponse[]>([]);
   const [loading, setLoading] = useState(Boolean(postId));
   const [submitting, setSubmitting] = useState(false);

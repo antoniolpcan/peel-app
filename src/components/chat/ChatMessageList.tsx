@@ -5,11 +5,11 @@ import type { MessageResponse } from '@/services/types';
 
 interface ChatMessageListProps {
   messages: MessageResponse[];
-  loggedUserId: number | null;
+  loggedUserId: string | null;
   loading: boolean;
   messagesEndRef: React.RefObject<HTMLDivElement | null>;
   formatDateDivider: (dateString: string) => string;
-  firstUnreadMessageId?: number | null;
+  firstUnreadMessageId?: string | null;
 }
 
 export const ChatMessageList = memo(function ChatMessageList({

@@ -9,7 +9,7 @@ interface PostModalsManagerProps {
   onSuccessCreate: () => void;
   selectedPost: PostResponse | null;
   onCloseView: () => void;
-  onLikePost: (postId: number) => Promise<PostResponse | null>;
+  onLikePost: (postId: string) => Promise<PostResponse | null>;
 }
 
 export const PostModalsManager = memo(function PostModalsManager({

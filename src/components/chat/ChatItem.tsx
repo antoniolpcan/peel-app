@@ -7,7 +7,7 @@ interface ChatItemProps {
   otherUser?: BasicUserResponse | null;
   isSelected: boolean;
   unreadCount?: number;
-  onSelect: (chatId: number) => void;
+  onSelect: (chatId: string) => void;
 }
 
 export const ChatItem = memo(function ChatItem({

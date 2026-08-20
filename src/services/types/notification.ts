@@ -9,17 +9,17 @@ export type UserActor = Pick<BasicUserResponse, 'id' | 'name' | 'username'> & {
 
 export interface NotificationCreate {
   type: NotificationType;
-  user_id: number;
-  entity_id?: number | null;
+  user_id: string;
+  entity_id: string | null;
 }
 
 export interface NotificationResponse {
-  id: number;
+  id: string;
   type: NotificationType;
-  user_id: number;
-  actor_id: number;
+  user_id: string;
+  actor_id: string;
   is_read: boolean;
   created_at: string;
-  entity_id?: number | null;
+  entity_id: string | null;
   actor: UserActor;
 }

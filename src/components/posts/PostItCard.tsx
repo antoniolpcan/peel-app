@@ -10,8 +10,8 @@ interface PostItCardProps {
   post: PostResponse;
   rotateClass?: string;
   onSelect: (post: PostResponse) => void;
-  onLike: (e: React.MouseEvent, id: number) => void;
-  onDelete: (e: React.MouseEvent, id: number) => void;
+  onLike: (e: React.MouseEvent, id: string) => void;
+  onDelete: (e: React.MouseEvent, id: string) => void;
   showTape?: boolean;
 }
 

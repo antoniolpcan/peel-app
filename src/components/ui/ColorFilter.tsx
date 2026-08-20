@@ -3,8 +3,8 @@ import type { ColorResponse } from '@/services/types';
 
 interface ColorFilterProps {
   colors: ColorResponse[];
-  selectedColorId: number | null;
-  onSelectColor: (colorId: number | null) => void;
+  selectedColorId: string | null;
+  onSelectColor: (colorId: string | null) => void;
 }
 
 export const ColorFilter = memo(function ColorFilter({ 

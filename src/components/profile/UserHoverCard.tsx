@@ -9,14 +9,14 @@ import { FollowButton } from '@/components/ui/FollowButton';
 import type { BasicUserResponse, FollowStatsResponse } from '@/services/types';
 
 interface UserHoverCardProps {
-  userId: number;
+  userId: string;
   user: BasicUserResponse;
   stats?: FollowStatsResponse | null;
   isOwnProfile: boolean;
   isAuthenticated: boolean;
   isFollowing: boolean;
   isFollowLoading: boolean;
-  onToggleFollow: (userId: number) => void;
+  onToggleFollow: (userId: string) => void;
 }
 
 export const UserHoverCard = memo(function UserHoverCard({

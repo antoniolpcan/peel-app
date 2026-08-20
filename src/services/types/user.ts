@@ -1,7 +1,7 @@
 import type { MediaFileBase } from "./base";
 
 export interface BasicUserResponse {
-  id: number;
+  id: string;
   name: string;
   username: string;
   bio?: string | null;
@@ -19,7 +19,7 @@ export interface UserCreate {
 }
 
 export interface UserResponse {
-  id: number;
+  id: string;
   name: string;
   email: string;
   created_at: string;
@@ -35,7 +35,7 @@ export interface UserUpdate {
   phone?: string | null;
   email?: string | null;
   bio?: string | null;
-  avatar_id?: number | null;
+  avatar_id?: string | null;
 }
 
 export type UserData = UserResponse;

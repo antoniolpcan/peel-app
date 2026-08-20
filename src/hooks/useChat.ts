@@ -82,7 +82,7 @@ export const useChat = (autoFetch = false) => {
     );
   }, [loggedUserId]);
 
-  const fetchMessages = useCallback(async (chatId: number, skip = 0, limit = 50) => {
+  const fetchMessages = useCallback(async (chatId: string, skip = 0, limit = 50) => {
     setLoadingMessages(true);
     setError(null);
     try {
@@ -105,7 +105,7 @@ export const useChat = (autoFetch = false) => {
     }
   }, [fetchUnreadSummary]);
 
-  const startDirectChat = useCallback(async (targetUserId: number) => {
+  const startDirectChat = useCallback(async (targetUserId: string) => {
     setLoadingChats(true);
     setError(null);
     try {
@@ -125,7 +125,7 @@ export const useChat = (autoFetch = false) => {
     }
   }, []);
 
-  const sendMessage = useCallback(async (chatId: number, data: MessageCreate) => {
+  const sendMessage = useCallback(async (chatId: string, data: MessageCreate) => {
     try {
       const newMsg = await chatService.sendMessage(chatId, data);
       
@@ -161,7 +161,7 @@ export const useChat = (autoFetch = false) => {
   }, []);
 
   const connectWebSocket = useCallback(
-    (chatId: number) => {
+    (chatId: string) => {
       disconnectWebSocket();
 
       if (!chatId) return;

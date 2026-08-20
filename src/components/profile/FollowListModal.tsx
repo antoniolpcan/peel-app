@@ -5,14 +5,14 @@ import { FollowListItem } from './FollowListItem';
 import type { BasicUserResponse, MediaFileBase } from '@/services/types';
 
 interface UserListItem {
-  id: number;
+  id: string;
   name?: string;
   username?: string;
   avatar?: MediaFileBase | string | null;
   is_following?: boolean;
   isFollowing?: boolean;
-  follower_id?: number;
-  following_id?: number;
+  follower_id?: string;
+  following_id?: string;
   follower?: BasicUserResponse & { is_following?: boolean };
   following?: BasicUserResponse & { is_following?: boolean };
   user?: BasicUserResponse & { is_following?: boolean };
@@ -24,11 +24,11 @@ interface FollowListModalProps {
   users: UserListItem[];
   myFollowingList?: any[];
   onClose: () => void;
-  onToggleFollow?: (userId: number) => void;
+  onToggleFollow?: (userId: string) => void;
   isOwnProfile?: boolean;
 }
 
-const isUserInList = (list: any[], targetId: number) => {
+const isUserInList = (list: any[], targetId: string) => {
   if (!Array.isArray(list) || !targetId) return false;
   return list.some((item) => {
     const uId =
@@ -52,7 +52,7 @@ export const FollowListModal = memo(function FollowListModal({
   isOwnProfile = true
 }: FollowListModalProps) {
 
-  const [followedOverrides, setFollowedOverrides] = useState<Record<number, boolean>>({});
+  const [followedOverrides, setFollowedOverrides] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     setFollowedOverrides({});
@@ -63,7 +63,7 @@ export const FollowListModal = memo(function FollowListModal({
   const isFollowersType = type === 'followers';
   const title = isFollowersType ? 'Seguidores' : 'Seguindo';
 
-  const handleToggle = (userId: number, currentStatus: boolean) => {
+  const handleToggle = (userId: string, currentStatus: boolean) => {
     const nextStatus = !currentStatus;
     setFollowedOverrides((prev) => ({
       ...prev,
@@ -116,7 +116,7 @@ export const FollowListModal = memo(function FollowListModal({
                 ? item.follower || item.user 
                 : item.following || item.user) || item;
 
-              const targetUserId = Number(
+              const targetUserId = String(
                 rawUser?.id || item.follower_id || item.following_id || item.id
               );
 

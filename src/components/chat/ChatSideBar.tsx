@@ -6,12 +6,12 @@ import type { ChatResponse, BasicUserResponse, UnreadSenderResponse } from '@/se
 interface ChatSidebarProps {
   chats: ChatResponse[];
   unreadSenders?: UnreadSenderResponse[];
-  selectedChatId: number | null;
+  selectedChatId: string | null;
   searchQuery: string;
   onSearchChange: (query: string) => void;
   loading: boolean;
   getOtherUser: (chat: ChatResponse) => BasicUserResponse | undefined;
-  onSelectChat: (chatId: number) => void;
+  onSelectChat: (chatId: string) => void;
 }
 
 export const ChatSidebar = memo(function ChatSidebar({

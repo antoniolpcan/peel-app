@@ -3,7 +3,7 @@ export type SortOrder = "asc" | "desc";
 export type PostSortField = "id" | "title" | "likes" | "created_at";
 
 export interface MediaFileBase {
-  id: number;
+  id: string;
   url: string;
   filename: string;
 }
@@ -14,7 +14,7 @@ export interface UploadResponse {
 }
 
 export interface ColorResponse {
-  id: number;
+  id: string;
   name: string;
   hex_code: string;
 }

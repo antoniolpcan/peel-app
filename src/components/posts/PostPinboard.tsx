@@ -9,8 +9,8 @@ interface PostPinboardProps {
   loading: boolean;
   hasMore: boolean;
   onFetchMore: () => void;
-  onLike: (id: number) => Promise<PostResponse | null>;
-  onDelete: (id: number) => Promise<boolean>;
+  onLike: (id: string) => Promise<PostResponse | null>;
+  onDelete: (id: string) => Promise<boolean>;
   onSelectPost: (value: PostResponse | null) => void;
   hasActiveFilters?: boolean;
   emptyMessage?: string;

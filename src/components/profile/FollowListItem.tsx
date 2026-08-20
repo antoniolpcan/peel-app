@@ -8,13 +8,13 @@ import { useFollowActions } from '@/hooks';
 
 interface FollowListItemProps {
   user: {
-    id: number;
+    id: string;
     name: string;
     username: string;
     avatar?: MediaFileBase | string | null;
     is_following?: boolean;
   };
-  onToggleFollow?: (userId: number) => void;
+  onToggleFollow?: (userId: string) => void;
   onCloseModal?: () => void;
 }
 

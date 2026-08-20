@@ -4,7 +4,7 @@ import { MessageSquare, Loader2 } from 'lucide-react';
 import { useChat } from '@/hooks/useChat';
 
 interface StartChatButtonProps {
-  targetUserId: number;
+  targetUserId: string;
 }
 
 export const StartChatButton = memo(function StartChatButton({ targetUserId }: StartChatButtonProps) {

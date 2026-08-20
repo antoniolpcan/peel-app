@@ -4,8 +4,8 @@ import { useToast } from '@/contexts/ToastContext';
 import type { FollowerResponse, FollowingResponse } from '@/services/types';
 
 export function useProfileFollow(
-  profileUserId: number, 
-  loggedUserId?: number | null, 
+  profileUserId: string, 
+  loggedUserId?: string | null, 
   isOwnProfile?: boolean, 
   userName?: string
 ) {
@@ -31,15 +31,15 @@ export function useProfileFollow(
   }, [isAlreadyFollowingOwner]);
 
   const followingIdsSet = useMemo(() => {
-    if (!following) return new Set<number>();
+    if (!following) return new Set<string>();
     
-    return new Set<number>(
+    return new Set<string>(
       following.map((f: FollowingResponse) => f.following?.id || f.following_id || f.id)
     );
   }, [following]);
 
-  const handleToggleFollow = useCallback(async (targetId?: number | unknown) => {
-    const targetUserId = typeof targetId === 'number' ? targetId : profileUserId;
+  const handleToggleFollow = useCallback(async (targetId?: string | unknown) => {
+    const targetUserId = typeof targetId === 'string' ? targetId : profileUserId;
 
     if (!targetUserId || targetUserId === loggedUserId) return;
 

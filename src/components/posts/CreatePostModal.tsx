@@ -20,7 +20,7 @@ export const CreatePostModal = memo(function CreatePostModal({ onClose, onSucces
 
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
-  const [selectedColorId, setSelectedColorId] = useState<number | null>(null);
+  const [selectedColorId, setSelectedColorId] = useState<string | null>(null);
 
   useEffect(() => {
     if (colors.length > 0 && selectedColorId === null) {

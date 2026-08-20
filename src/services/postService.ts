@@ -15,13 +15,11 @@ export const postService = {
 
     const queryString = new URLSearchParams(filteredParams).toString();
     return apiFetch<PostResponse[]>(`/posts?${queryString}`, {
-      auth: true,
     });
   },
 
-  getPostById: async (postId: number): Promise<PostResponse> => {
+  getPostById: async (postId: string): Promise<PostResponse> => {
     return apiFetch<PostResponse>(`/posts/${postId}`, {
-      auth: true,
     });
   },
 
@@ -29,42 +27,37 @@ export const postService = {
     return apiFetch<PostResponse>('/posts', {
       method: 'POST',
       body: data,
-      auth: true,
     });
   },
 
-  updatePost: async (postId: number, data: PostUpdate): Promise<PostResponse> => {
+  updatePost: async (postId: string, data: PostUpdate): Promise<PostResponse> => {
     return apiFetch<PostResponse>(`/posts/${postId}`, {
       method: 'PATCH',
       body: data,
-      auth: true,
     });
   },
 
-  deletePost: async (postId: number): Promise<boolean> => {
+  deletePost: async (postId: string): Promise<boolean> => {
     return apiFetch<boolean>(`/posts/${postId}`, {
       method: 'DELETE',
-      auth: true,
     });
   },
 
-  likePost: async (postId: number): Promise<PostResponse> => {
+  likePost: async (postId: string): Promise<PostResponse> => {
     return apiFetch<PostResponse>(`/posts/${postId}/like`, {
       method: 'POST',
-      auth: true,
     });
   },
 
-  getComments: async (postId: number, skip = 0, limit = 50): Promise<CommentResponse[]> => {
+  getComments: async (postId: string, skip = 0, limit = 50): Promise<CommentResponse[]> => {
     const params = new URLSearchParams({ skip: String(skip), limit: String(limit) });
     return apiFetch<CommentResponse[]>(`/posts/${postId}/comments?${params.toString()}`);
   },
 
-  createComment: async (postId: number, content: string): Promise<CommentResponse> => {
+  createComment: async (postId: string, content: string): Promise<CommentResponse> => {
   const params = new URLSearchParams({ content });
       return apiFetch<CommentResponse>(`/posts/${postId}/comments?${params.toString()}`, {
       method: 'POST',
-      auth: true,
     });
   },
 };

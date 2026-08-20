@@ -1,6 +1,6 @@
 export interface UserSettingResponse {
-  id: number;
-  user_id: number;
+  id: string;
+  user_id: string;
   theme?: string;
   sound?: boolean;
   is_private?: boolean;

@@ -15,7 +15,7 @@ import { UserBadge } from '../profile/UserBadge';
 interface ViewPostModalProps {
   post: PostResponse;
   onClose: () => void;
-  handleLike: (id: number) => Promise<PostResponse | null>;
+  handleLike: (id: string) => Promise<PostResponse | null>;
 }
 
 export const ViewPostModal = memo(function ViewPostModal({ 

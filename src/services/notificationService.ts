@@ -5,7 +5,6 @@ export const notificationService = {
   createNotification: async (data: NotificationCreate): Promise<NotificationResponse> => {
     return apiFetch<NotificationResponse>('/notifications/', {
       method: 'POST',
-      auth: true,
       body: data,
     });
   },
@@ -13,21 +12,18 @@ export const notificationService = {
   listNotifications: async (skip = 0, limit = 20): Promise<NotificationResponse[]> => {
     const params = new URLSearchParams({ skip: String(skip), limit: String(limit) });
     return apiFetch<NotificationResponse[]>(`/notifications/me?${params.toString()}`, {
-      auth: true,
     });
   },
 
-  markAsRead: async (notificationId: number): Promise<NotificationResponse> => {
+  markAsRead: async (notificationId: string): Promise<NotificationResponse> => {
     return apiFetch<NotificationResponse>(`/notifications/${notificationId}/read`, {
       method: 'PATCH',
-      auth: true,
     });
   },
 
   markAllAsRead: async (): Promise<{ message: string }> => {
     return apiFetch<{ message: string }>('/notifications/read-all', {
       method: 'PATCH',
-      auth: true,
     });
   },
 };

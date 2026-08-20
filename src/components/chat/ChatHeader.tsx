@@ -5,7 +5,7 @@ import { UserAvatar } from '@/components/profile/UserAvatar';
 import type { BasicUserResponse } from '@/services/types';
 
 interface ChatHeaderProps {
-  selectedChatId: number;
+  selectedChatId: string;
   activeOtherUser?: BasicUserResponse | null;
   onBack: () => void;
 }

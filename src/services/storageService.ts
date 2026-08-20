@@ -13,8 +13,7 @@ export const storageService = {
 
     return apiFetch<UploadResponse>('/storage/upload', {
       method: 'POST',
-      body: formData,
-      auth: true,
+      body: formData
     });
   },
 };

@@ -10,7 +10,7 @@ import { UserAvatar } from './UserAvatar';
 import { UserHoverCard } from './UserHoverCard';
 
 interface UserBadgeProps {
-  userId: number;
+  userId: string;
   user?: (BasicUserResponse & { is_following?: boolean }) | null;
   onNavigate?: () => void;
 }

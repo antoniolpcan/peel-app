@@ -4,8 +4,8 @@ import type { ColorResponse } from '@/services/types';
 
 interface ColorPalettePickerProps {
   colors: ColorResponse[];
-  selectedColorId?: number;
-  onSelectColor: (colorId: number) => void;
+  selectedColorId?: string;
+  onSelectColor: (colorId: string) => void;
 }
 
 export const ColorPalettePicker = memo(function ColorPalettePicker({ 

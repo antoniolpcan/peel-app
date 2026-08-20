@@ -41,7 +41,7 @@ export function Feed() {
   const { colors } = useColors();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [search, setSearch] = useState('');
-  const [selectedColorId, setSelectedColorId] = useState<number | null>(null);
+  const [selectedColorId, setSelectedColorId] = useState<string | null>(null);
   const [shuffleSeed, setShuffleSeed] = useState(0);
 
   const handleOpenCreateModal = useCallback(() => setIsModalOpen(true), []);

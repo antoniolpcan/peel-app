@@ -23,7 +23,7 @@ function formatNotificationDate(dateString: string): string {
 
 interface NotificationItemProps {
   notification: NotificationResponse;
-  onItemClick: (id: number, isRead: boolean) => void;
+  onItemClick: (id: string, isRead: boolean) => void;
 }
 
 export const NotificationItem = memo(function NotificationItem({

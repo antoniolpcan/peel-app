@@ -55,7 +55,7 @@ export function ChatPage() {
   } = useChat(true);
 
   const selectedChatId = useMemo(() => {
-    return urlChatId ? Number(urlChatId) : null;
+    return urlChatId ? String(urlChatId) : null;
   }, [urlChatId]);
 
   const [messageText, setMessageText] = useState('');
@@ -86,7 +86,7 @@ export function ChatPage() {
   }, [activeMessages]);
 
   const handleSelectChat = useCallback(
-    (id: number | null) => {
+    (id: string | null) => {
       if (id) {
         navigate(`/chat/${id}`);
       } else {

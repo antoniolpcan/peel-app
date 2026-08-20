@@ -12,7 +12,7 @@ export function useProfileEdit(user: BasicUserResponse | null, onUpdateSuccess: 
   const [isEditing, setIsEditing] = useState(false);
   const [tempImageSrc, setTempImageSrc] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({ name: '', bio: '', username: '' });
-  const [selectedAvatarId, setSelectedAvatarId] = useState<number | null>(null);
+  const [selectedAvatarId, setSelectedAvatarId] = useState<string | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
 
   const revokeBlobUrl = (url: string | null) => {
