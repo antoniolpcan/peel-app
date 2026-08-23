@@ -59,8 +59,8 @@ export const UserBadge = memo(function UserBadge({
     };
   }, []);
 
-  const handleToggleFollow = useCallback(async (targetUserId?: number) => {
-    const idToProcess = typeof targetUserId === 'number' ? targetUserId : userId;
+  const handleToggleFollow = useCallback(async (targetUserId?: string) => {
+    const idToProcess = typeof targetUserId === 'string' ? targetUserId : userId;
 
     if (!idToProcess) return;
 
