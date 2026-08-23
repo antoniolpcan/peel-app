@@ -13,6 +13,7 @@ export interface UserCreate {
   name: string;
   email: string;
   password: string;
+  verification_token: string;
   username?: string | null;
   phone?: string | null;
   bio?: string | null;

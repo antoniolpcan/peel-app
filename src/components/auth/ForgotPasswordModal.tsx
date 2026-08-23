@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuthApi } from '@/hooks/useAuth';
 import { useToast } from '@/contexts/ToastContext';
+import { Button } from '../ui/Button';
 
 interface ForgotPasswordModalProps {
   isOpen: boolean;
@@ -88,13 +89,12 @@ export function ForgotPasswordModal({ isOpen, onClose, onBackToLogin }: ForgotPa
               />
             </div>
 
-            <button
+            <Button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl transition-all cursor-pointer shadow-sm disabled:opacity-50 mt-2"
             >
               {loading ? 'Enviando...' : 'Enviar Link de Recuperação'}
-            </button>
+            </Button>
 
             <button
               type="button"

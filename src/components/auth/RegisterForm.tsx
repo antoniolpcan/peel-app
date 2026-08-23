@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import { User, AtSign, Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { User, AtSign, Mail, Lock, Eye, EyeOff, KeyRound } from 'lucide-react';
 
 import { useUserActions } from '@/hooks/useUsers';
 import { useToast } from '@/contexts/ToastContext';
@@ -13,9 +13,15 @@ interface RegisterFormProps {
   isRegisterMode: boolean;
   onToggleMode: (mode: 'login' | 'register') => void;
   onSuccessRegister: (createdEmail: string) => void;
+  onSendMailVerification: (email: string) => Promise<boolean>;
 }
 
-export function RegisterForm({ isRegisterMode, onToggleMode, onSuccessRegister }: RegisterFormProps) {
+export function RegisterForm({ 
+  isRegisterMode, 
+  onToggleMode, 
+  onSuccessRegister,
+  onSendMailVerification 
+}: RegisterFormProps) {
   const { addToast } = useToast();
   const { createUser, loading, error } = useUserActions();
 
@@ -24,8 +30,12 @@ export function RegisterForm({ isRegisterMode, onToggleMode, onSuccessRegister }
     username: '',
     email: '',
     password: '',
+    verification_token: '',
   });
+
   const [showPassword, setShowPassword] = useState(false);
+  const [codeSent, setCodeSent] = useState(false);
+  const [isSendingCode, setIsSendingCode] = useState(false);
 
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -50,6 +60,25 @@ export function RegisterForm({ isRegisterMode, onToggleMode, onSuccessRegister }
     return { score: 3, label: 'Forte', color: 'bg-emerald-500', text: 'text-emerald-500' };
   }, [formData.password]);
 
+  const handleSendCode = useCallback(async () => {
+    const cleanEmail = formData.email.trim();
+    if (!cleanEmail) {
+      addToast('Insira um e-mail válido primeiro.', 'error');
+      return;
+    }
+
+    setIsSendingCode(true);
+    try {
+      const success = await onSendMailVerification(cleanEmail);
+      if (success) {
+        setCodeSent(true);
+        addToast('Código enviado para seu e-mail!', 'success');
+      }
+    } finally {
+      setIsSendingCode(false);
+    }
+  }, [formData.email, onSendMailVerification, addToast]);
+
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
@@ -57,13 +86,14 @@ export function RegisterForm({ isRegisterMode, onToggleMode, onSuccessRegister }
       const cleanEmail = formData.email.trim();
       const formattedUsername = formData.username.trim();
 
-      if (!cleanName || !cleanEmail || !formData.password) return;
+      if (!cleanName || !cleanEmail || !formData.password || !formData.verification_token) return;
 
       const newUser = await createUser({
         name: cleanName,
         email: cleanEmail,
         password: formData.password,
         username: formattedUsername !== '' ? formattedUsername : null,
+        verification_token: formData.verification_token,
       });
 
       if (newUser) {
@@ -140,21 +170,55 @@ export function RegisterForm({ isRegisterMode, onToggleMode, onSuccessRegister }
           <label htmlFor="reg-email" className="text-xs font-semibold text-app-muted ml-1">
             E-mail
           </label>
-          <div className="relative">
-            <Mail className="w-4 h-4 text-app-muted absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-            <Input
-              id="reg-email"
-              name="email"
-              type="email"
-              placeholder="seu@email.com"
-              value={formData.email}
-              onChange={handleChange}
-              disabled={loading}
-              className="pl-9"
-              required
-            />
+          <div className="relative flex gap-2">
+            <div className="relative flex-1">
+              <Mail className="w-4 h-4 text-app-muted absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <Input
+                id="reg-email"
+                name="email"
+                type="email"
+                placeholder="seu@email.com"
+                value={formData.email}
+                onChange={handleChange}
+                disabled={loading || codeSent}
+                className="pl-9"
+                required
+              />
+            </div>
+            <Button
+              type="button"
+              onClick={handleSendCode}
+              isLoading={isSendingCode}
+              disabled={loading || codeSent || !formData.email}
+              className="text-xs whitespace-nowrap px-3"
+            >
+              {codeSent ? 'Enviado' : 'Enviar código'}
+            </Button>
           </div>
         </div>
+
+        {codeSent && (
+          <div className="space-y-1 animate-in fade-in duration-300">
+            <label htmlFor="reg-code" className="text-xs font-semibold text-app-muted ml-1">
+              Código de Verificação
+            </label>
+            <div className="relative">
+              <KeyRound className="w-4 h-4 text-app-muted absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <Input
+                id="reg-code"
+                name="verification_token"
+                type="text"
+                placeholder="Digite o código de 6 dígitos"
+                value={formData.verification_token}
+                onChange={handleChange}
+                disabled={loading}
+                className="pl-9"
+                maxLength={6}
+                required
+              />
+            </div>
+          </div>
+        )}
 
         <div className="space-y-1">
           <div className="flex items-center justify-between px-1">
@@ -204,7 +268,13 @@ export function RegisterForm({ isRegisterMode, onToggleMode, onSuccessRegister }
           )}
         </div>
 
-        <Button type="submit" isLoading={loading} loadingText="Criando conta..." className="mt-1">
+        <Button 
+          type="submit" 
+          isLoading={loading} 
+          loadingText="Criando conta..." 
+          disabled={!codeSent || !formData.verification_token}
+          className="mt-1"
+        >
           Criar minha conta
         </Button>
       </form>

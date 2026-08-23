@@ -13,6 +13,13 @@ export const authService = {
     });
   },
 
+  sendMailVerification: async (email: string): Promise<{ message: string }> => {
+    return apiFetch<{ message: string }>('/auth/send-mail-verification', {
+      method: 'POST',
+      body: { email },
+    });
+  },
+
   forgotPassword: async (email: string): Promise<{ message: string }> => {
     return apiFetch<{ message: string }>('/auth/forgot-password', {
       method: 'POST',

@@ -28,6 +28,24 @@ export function useAuthApi() {
     []
   );
 
+  const executeSendMailVerification = useCallback(
+    async (email: string): Promise<boolean> => {
+      try {
+        setLoading(true);
+        setError(null);
+        await authService.sendMailVerification(email);
+        return true;
+      } catch (err: unknown) {
+        const errorMessage = parseApiError(err);
+        setError(errorMessage);
+        return false;
+      } finally {
+        setLoading(false);
+      }
+    },
+    []
+  );
+
   const executeForgotPassword = useCallback(
     async (email: string): Promise<boolean> => {
       try {
@@ -66,6 +84,7 @@ export function useAuthApi() {
 
   return {
     executeLogin,
+    executeSendMailVerification,
     executeForgotPassword,
     executeResetPassword,
     loading,
