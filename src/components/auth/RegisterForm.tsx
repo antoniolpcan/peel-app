@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { User, AtSign, Mail, Lock, Eye, EyeOff, KeyRound } from 'lucide-react';
 
 import { useUserActions } from '@/hooks/useUsers';
@@ -36,6 +36,7 @@ export function RegisterForm({
   const [showPassword, setShowPassword] = useState(false);
   const [codeSent, setCodeSent] = useState(false);
   const [isSendingCode, setIsSendingCode] = useState(false);
+  const [countdown, setCountdown] = useState(0);
 
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -60,7 +61,18 @@ export function RegisterForm({
     return { score: 3, label: 'Forte', color: 'bg-emerald-500', text: 'text-emerald-500' };
   }, [formData.password]);
 
+  useEffect(() => {
+    if (countdown <= 0) return;
+
+    const timer = setInterval(() => {
+      setCountdown((prev) => prev - 1);
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [countdown]);
+
   const handleSendCode = useCallback(async () => {
+    if (countdown > 0) return;
     const cleanEmail = formData.email.trim();
     if (!cleanEmail) {
       addToast('Insira um e-mail válido primeiro.', 'error');
@@ -68,6 +80,8 @@ export function RegisterForm({
     }
 
     setIsSendingCode(true);
+    setCountdown(60);
+    
     try {
       const success = await onSendMailVerification(cleanEmail);
       if (success) {
@@ -180,7 +194,7 @@ export function RegisterForm({
                 placeholder="seu@email.com"
                 value={formData.email}
                 onChange={handleChange}
-                disabled={loading || codeSent}
+                disabled={loading || isSendingCode}
                 className="pl-9"
                 required
               />
@@ -189,10 +203,14 @@ export function RegisterForm({
               type="button"
               onClick={handleSendCode}
               isLoading={isSendingCode}
-              disabled={loading || codeSent || !formData.email}
+              disabled={loading || !formData.email || countdown > 0}
               className="text-xs whitespace-nowrap px-3"
             >
-              {codeSent ? 'Enviado' : 'Enviar código'}
+              {countdown > 0 
+                ? `Aguarde (${countdown}s)` 
+                : codeSent 
+                  ? 'Reenviar código' 
+                  : 'Enviar código'}
             </Button>
           </div>
         </div>

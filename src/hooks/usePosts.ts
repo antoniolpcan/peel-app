@@ -39,15 +39,21 @@ export function usePosts(params: UsePostsParams = {}) {
         setPosts(data);
         setHasMore(data.length === LIMIT);
       }
-    } catch (err: unknown) {
+    } catch (err: any) {
       if (currentRequestId === activeRequestRef.current) {
-        setError(parseApiError(err) || 'Erro ao carregar posts');
+          const parsedError = parseApiError(err);
+          if (parsedError?.toLowerCase().includes('not found') || err?.status === 404) {
+            setPosts([]);
+            setHasMore(false);
+          } else {
+            setError(parsedError || 'Erro ao carregar posts');
+          }
+        }
+      } finally {
+        if (currentRequestId === activeRequestRef.current) {
+          setLoading(false);
+        }
       }
-    } finally {
-      if (currentRequestId === activeRequestRef.current) {
-        setLoading(false);
-      }
-    }
   }, [paramsSerialized]);
 
   const fetchMorePosts = useCallback(async () => {
