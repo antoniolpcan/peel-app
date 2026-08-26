@@ -1,5 +1,4 @@
 import React, { useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 
 import { useAuth } from '@/contexts/AuthContext';
@@ -18,7 +17,6 @@ interface LoginFormProps {
 }
 
 export function LoginForm({ isRegisterMode, onToggleMode, onOpenForgotModal }: LoginFormProps) {
-  const navigate = useNavigate();
   const { login: saveSession } = useAuth();
   const { addToast } = useToast();
   const { executeLogin, loading, error } = useAuthApi();
@@ -36,12 +34,11 @@ export function LoginForm({ isRegisterMode, onToggleMode, onOpenForgotModal }: L
       const response = await executeLogin(cleanEmail, password);
 
       if (response?.access_token) {
+        await saveSession();
         addToast('Bem-vindo de volta ao Peel!', 'success');
-        saveSession(response.access_token);
-        navigate('/', { replace: true });
       }
     },
-    [email, password, executeLogin, saveSession, addToast, navigate]
+    [email, password, executeLogin, saveSession, addToast]
   );
 
   return (

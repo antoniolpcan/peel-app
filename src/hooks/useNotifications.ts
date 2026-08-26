@@ -74,7 +74,7 @@ export const useNotifications = (autoFetch = true) => {
     let isComponentMounted = true;
     const token = localStorage.getItem('@peel:token');
     
-    const wsUrl = `${WS_BASE_URL}/notifications/ws/${loggedUserId}${token ? `?token=${token}` : ''}`;
+    const wsUrl = `${WS_BASE_URL}/notifications/ws${token ? `?token=${token}` : ''}`;
     const ws = new WebSocket(wsUrl);
 
     ws.onopen = () => {

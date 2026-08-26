@@ -9,6 +9,10 @@ export const userService = {
     });
   },
 
+  getMe: async (): Promise<UserResponse> => {
+    return apiFetch<UserResponse>('/users/me/logged');
+  },
+
   getUsers: async (skip = 0, limit = 50): Promise<BasicUserResponse[]> => {
     const params = new URLSearchParams({ skip: String(skip), limit: String(limit) });
     return apiFetch<BasicUserResponse[]>(`/users?${params.toString()}`);

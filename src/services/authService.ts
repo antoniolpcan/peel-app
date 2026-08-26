@@ -10,6 +10,7 @@ export const authService = {
     return apiFetch<Token>('/auth', {
       method: 'POST',
       body: formData,
+      skipUnauthorizedEvent: true,
     });
   },
 
