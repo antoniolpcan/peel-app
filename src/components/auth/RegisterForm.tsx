@@ -14,13 +14,15 @@ interface RegisterFormProps {
   onToggleMode: (mode: 'login' | 'register') => void;
   onSuccessRegister: (createdEmail: string) => void;
   onSendMailVerification: (email: string) => Promise<boolean>;
+  mailVerificationError: string | null;
 }
 
-export function RegisterForm({ 
-  isRegisterMode, 
-  onToggleMode, 
+export function RegisterForm({
+  isRegisterMode,
+  onToggleMode,
   onSuccessRegister,
-  onSendMailVerification 
+  onSendMailVerification,
+  mailVerificationError,
 }: RegisterFormProps) {
   const { addToast } = useToast();
   const { createUser, loading, error } = useUserActions();
@@ -72,7 +74,7 @@ export function RegisterForm({
   }, [countdown]);
 
   const handleSendCode = useCallback(async () => {
-    if (countdown > 0) return;
+    if (countdown > 0 || isSendingCode) return;
     const cleanEmail = formData.email.trim();
     if (!cleanEmail) {
       addToast('Insira um e-mail válido primeiro.', 'error');
@@ -80,18 +82,24 @@ export function RegisterForm({
     }
 
     setIsSendingCode(true);
-    setCountdown(60);
-    
+
     try {
       const success = await onSendMailVerification(cleanEmail);
       if (success) {
         setCodeSent(true);
+        setCountdown(30);
         addToast('Código enviado para seu e-mail!', 'success');
       }
     } finally {
       setIsSendingCode(false);
     }
-  }, [formData.email, onSendMailVerification, addToast]);
+  }, [
+    formData.email,
+    onSendMailVerification,
+    addToast,
+    countdown,
+    isSendingCode,
+  ]);
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
@@ -138,7 +146,12 @@ export function RegisterForm({
         </p>
       </div>
 
-      {error && <ErrorMessage message={error} className="mb-3" />}
+      {(mailVerificationError || error) && (
+        <ErrorMessage
+          message={mailVerificationError || error}
+          className="mb-3"
+        />
+      )}
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
         <div className="space-y-1">

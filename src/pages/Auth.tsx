@@ -13,7 +13,7 @@ export function AuthPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { isAuthenticated } = useAuth();
-  const { clearError: clearLoginError, executeSendMailVerification } = useAuthApi();
+  const { clearError: clearLoginError, error: mailVerificationError, executeSendMailVerification } = useAuthApi();
 
   const [isRegisterMode, setIsRegisterMode] = useState(() => {
     return location.pathname.includes('register');
@@ -56,6 +56,7 @@ export function AuthPage() {
           onToggleMode={handleToggleMode}
           onSuccessRegister={handleSuccessRegister}
           onSendMailVerification={executeSendMailVerification}
+          mailVerificationError={mailVerificationError}
         />
 
         <AuthSlidingOverlay
