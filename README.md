@@ -35,9 +35,6 @@ Para rodar a aplicação web localmente na sua máquina, siga os passos abaixo:
 
     # Instale as dependências
     npm install
-    
-    # Instale o Tailwind e suas dependências do Vite
-    npm install tailwindcss @tailwindcss/vite
 
     # Inicialize o servidor de desenvolvimento
     npm run dev
